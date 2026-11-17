@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SGK — Sistema Gerenciador Culinário Kennedy. Gestão de cozinha escolar, receitas, estoque, higiene e relatórios para a direção." />
+  <meta name="theme-color" content="#1f7a4d" />
+  <title>SGK — Sistema Gerenciador Kennedy</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- ===== Overlay de fundo (mobile) ===== -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">SGK</div>
+      <div class="logo-text">
+        <strong>Sistema Gerenciador</strong>
+        <span>Culinário Kennedy</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Fechar menu">✕</button>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <p class="nav-label">GERAL</p>
+      <button class="nav-item active" data-section="inicio">
+        <span class="nav-icon">🏠</span><span>Início</span>
+      </button>
+      <button class="nav-item" data-section="cardapio">
+        <span class="nav-icon">📅</span><span>Cardápio Semanal</span>
+      </button>
+      <button class="nav-item" data-section="receitas">
+        <span class="nav-icon">📖</span><span>Receitas</span>
+        <span class="nav-badge" id="badgeReceitas">0</span>
+      </button>
+      <button class="nav-item" data-section="estoque">
+        <span class="nav-icon">📦</span><span>Estoque</span>
+        <span class="nav-badge alert" id="badgeEstoque">0</span>
+      </button>
+      <button class="nav-item" data-section="higiene">
+        <span class="nav-icon">🧼</span><span>Higiene e Boas Práticas</span>
+      </button>
+
+      <p class="nav-label diretora-label">DIRETORA PEDAGÓGICA</p>
+      <button class="nav-item nav-diretora" data-section="avisos">
+        <span class="nav-icon">🔔</span><span>Avisos</span>
+        <span class="nav-badge alert" id="badgeAvisos">0</span>
+      </button>
+      <button class="nav-item nav-diretora" data-section="aprovacoes">
+        <span class="nav-icon">✅</span><span>Aprovar Receitas</span>
+        <span class="nav-badge" id="badgeAprovacoes">0</span>
+      </button>
+      <button class="nav-item nav-diretora" data-section="relatorio">
+        <span class="nav-icon">📊</span><span>Relatório de Desperdício</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-icon">💚</div>
+      <div>
+        <strong>Feito com carinho</strong>
+        <span>para a cozinha da Kennedy</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Área principal ===== -->
+  <div class="main-wrap">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+
+      <div class="topbar-title">
+        <span class="topbar-sub" id="topbarSub">SGK / Início</span>
+        <h1 id="topbarTitle">Início</h1>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="role-switch" title="Alternar perfil de acesso">
+          <span class="role-label">Acesso:</span>
+          <select id="roleSelect" aria-label="Selecionar perfil">
+            <option value="tia">👩‍🍳 Tia da Cozinha</option>
+            <option value="diretora">🎓 Diretora Pedagoga</option>
+          </select>
+        </div>
+        <button class="icon-btn" id="btnTema" aria-label="Alternar tema" title="Alternar tema claro/escuro">🌙</button>
+        <button class="icon-btn" id="btnNotificacoes" aria-label="Notificações" title="Notificações">
+          🔔<span class="dot" id="notifDot"></span>
+        </button>
+        <div class="user-chip">
+          <span class="avatar" id="userAvatar">👩‍🍳</span>
+          <div class="user-info">
+            <strong id="userName">Equipe da Cozinha</strong>
+            <span id="userRole">Tia da Cozinha</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Conteúdo das seções -->
+    <main class="content" id="content">
+      <!-- SEÇÃO: INÍCIO -->
+      <section class="section active" id="section-inicio">
+        <div class="hero">
+          <div class="hero-text">
+            <span class="hero-eyebrow">🏫 Sistema Gerenciador Kennedy</span>
+            <h2>Bem-vinda ao <span>SGK</span>!</h2>
+            <p>
+              Tudo o que a cozinha da escola precisa em um só lugar: receitas passo a passo,
+              cardápio da semana, controle de estoque, dicas de higiene e relatórios para a direção.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" data-go="receitas">📖 Ver Receitas</button>
+              <button class="btn btn-outline" data-go="cardapio">📅 Cardápio da Semana</button>
+              <button class="btn btn-ghost" id="btnCadastrarAlimento">➕ Cadastrar alimento</button>
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="plate">🍲</div>
+            <span class="float f1">🥕</span>
+            <span class="float f2">🍅</span>
+            <span class="float f3">🥬</span>
+            <span class="float f4">🍊</span>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="section-heading">
+          <div>
+            <h3>Acesso rápido</h3>
+            <p>O que você mais usa no dia a dia</p>
+          </div>
+        </div>
+        <div class="quick-grid">
+          <button class="quick-card qc-green" data-go="receitas">
+            <span class="qc-icon">📖</span>
+            <strong>Receitas</strong>
+            <span>Modo de preparo passo a passo e dicas de produtividade.</span>
+            <span class="qc-arrow">Acessar →</span>
+          </button>
+          <button class="quick-card qc-orange" data-go="cardapio">
+            <span class="qc-icon">📅</span>
+            <strong>Cardápio</strong>
+            <span>Planejamento completo das refeições da semana.</span>
+            <span class="qc-arrow">Acessar →</span>
+          </button>
+          <button class="quick-card qc-blue" data-go="estoque">
+            <span class="qc-icon">📦</span>
+            <strong>Estoque</strong>
+            <span>Controle de quantidade, validade e reposição.</span>
+            <span class="qc-arrow">Acessar →</span>
+          </button>
+          <button class="quick-card qc-purple" data-go="higiene">
+            <span class="qc-icon">🧼</span>
+            <strong>Higiene</strong>
+            <span>Boas práticas para uma cozinha segura e saudável.</span>
+            <span class="qc-arrow">Acessar →</span>
+          </button>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>🔔 Últimos avisos</h3>
+              <button class="link-btn" data-go="avisos">Ver todos →</button>
+            </div>
+            <div id="homeAvisos" class="mini-list"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>💡 Dica do dia</h3>
+              <button class="link-btn" id="novaDica">Trocar dica ↻</button>
+            </div>
+            <div class="dica-dia" id="dicaDia"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO: CARDÁPIO -->
+      <section class="section" id="section-cardapio">
+        <div class="page-intro">
+          <div>
+            <h2>📅 Cardápio Semanal</h2>
+            <p>O planejamento de todas as refeições. Clique em um dia para ver os detalhes.</p>
+          </div>
+          <button class="btn btn-primary" id="btnImprimirCardapio">🖨️ Imprimir cardápio</button>
+        </div>
+        <div class="semana-tabs" id="semanaTabs"></div>
+        <div id="cardapioDetalhe"></div>
+        <div class="panel" style="margin-top: 22px;">
+          <div class="panel-head">
+            <h3>📋 Visão geral da semana</h3>
+          </div>
+          <div class="tabela-wrap">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th>Dia</th><th>Café da manhã</th><th>Almoço</th><th>Lanche</th><th>Sobremesa</th>
+                </tr>
+              </thead>
+              <tbody id="cardapioTabela"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO: RECEITAS -->
+      <section class="section" id="section-receitas">
+        <div class="page-intro">
+          <div>
+            <h2>📖 Receitas passo a passo</h2>
+            <p>Preparo eficiente, produtivo e seguro para a cozinha escolar.</p>
+          </div>
+          <button class="btn btn-primary" id="btnNovaReceita">➕ Nova receita</button>
+        </div>
+
+        <div class="filtros" id="filtrosReceitas">
+          <button class="chip active" data-cat="Todas">Todas</button>
+          <button class="chip" data-cat="Prato principal">Pratos principais</button>
+          <button class="chip" data-cat="Acompanhamento">Acompanhamentos</button>
+          <button class="chip" data-cat="Salada">Saladas</button>
+          <button class="chip" data-cat="Sobremesa">Sobremesas</button>
+          <button class="chip" data-cat="Bebida">Bebidas</button>
+          <div class="busca-wrap">
+            <span>🔍</span>
+            <input type="search" id="buscaReceita" placeholder="Buscar receita..." />
+          </div>
+        </div>
+
+        <div class="receitas-grid" id="receitasGrid"></div>
+      </section>
+
+      <!-- SEÇÃO: ESTOQUE -->
+      <section class="section" id="section-estoque">
+        <div class="page-intro">
+          <div>
+            <h2>📦 Controle de Estoque</h2>
+            <p>Cadastre alimentos com quantidade, preço e validade. Tias e direção podem gerenciar juntos.</p>
+          </div>
+          <button class="btn btn-primary" id="btnNovoItem">➕ Cadastrar alimento</button>
+        </div>
+
+        <div class="stats-grid stats-pequeno" id="estoqueStats"></div>
+
+        <div class="alerta-box" id="alertaEstoque"></div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>📋 Inventário</h3>
+            <div class="busca-wrap">
+              <span>🔍</span>
+              <input type="search" id="buscaEstoque" placeholder="Buscar item..." />
+            </div>
+          </div>
+          <div class="tabela-wrap">
+            <table class="tabela" id="tabelaEstoque">
+              <thead>
+                <tr>
+                  <th>Item</th><th>Categoria</th><th>Quantidade</th><th>Preço unit.</th><th>Valor total</th><th>Mínimo</th><th>Validade</th><th>Status</th><th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="estoqueTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO: HIGIENE -->
+      <section class="section" id="section-higiene">
+        <div class="page-intro">
+          <div>
+            <h2>🧼 Higiene e Boas Práticas</h2>
+            <p>Cuidados essenciais para preservar a saúde de todos na escola.</p>
+          </div>
+        </div>
+        <div class="higiene-banner">
+          <div class="hb-icon">🛡️</div>
+          <div>
+            <strong>Cozinha segura é cozinha saudável!</strong>
+            <p>Siga estas orientações todos os dias. Marque os itens conferidos no checklist abaixo.</p>
+          </div>
+        </div>
+        <div class="higiene-grid" id="higieneGrid"></div>
+
+        <div class="panel" style="margin-top: 24px;">
+          <div class="panel-head">
+            <h3>✅ Checklist diário de higiene</h3>
+            <button class="link-btn" id="resetChecklist">Resetar checklist ↻</button>
+          </div>
+          <div class="checklist" id="checklist"></div>
+          <div class="checklist-progress">
+            <div class="progress-info"><span>Progresso de hoje</span><strong id="checklistTexto">0 de 0</strong></div>
+            <div class="progress-bar"><div class="progress-fill" id="checklistBar"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO: AVISOS -->
+      <section class="section" id="section-avisos">
+        <div class="page-intro">
+          <div>
+            <h2>🔔 Avisos</h2>
+            <p>Comunicações entre a direção e a equipe da cozinha.</p>
+          </div>
+          <button class="btn btn-primary" id="btnNovoAviso">➕ Criar aviso</button>
+        </div>
+        <div class="avisos-lista" id="avisosLista"></div>
+      </section>
+
+      <!-- SEÇÃO: APROVAÇÕES -->
+      <section class="section" id="section-aprovacoes">
+        <div class="page-intro">
+          <div>
+            <h2>✅ Aprovação de Receitas</h2>
+            <p>Receitas enviadas pela equipe aguardando análise da direção pedagógica.</p>
+          </div>
+        </div>
+        <div id="aprovacoesLista"></div>
+      </section>
+
+      <!-- SEÇÃO: RELATÓRIO -->
+      <section class="section" id="section-relatorio">
+        <div class="page-intro">
+          <div>
+            <h2>📊 Relatório de Desperdício</h2>
+            <p id="relatorioSubtitulo">Acompanhamento mensal de perdas e sugestões de redução.</p>
+          </div>
+          <button class="btn btn-primary" id="btnNovoDesperdicio">➕ Registrar desperdício</button>
+        </div>
+
+        <div class="stats-grid" id="relatorioStats"></div>
+
+        <div class="two-col relatorio-charts">
+          <div class="panel">
+            <div class="panel-head"><h3>📈 Desperdício por semana</h3></div>
+            <div class="chart" id="chartSemanas"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>🥧 Por motivo</h3></div>
+            <div class="chart" id="chartMotivos"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>📋 Registros do mês</h3>
+            <button class="link-btn" id="btnExportar">⬇️ Exportar CSV</button>
+          </div>
+          <div class="tabela-wrap">
+            <table class="tabela">
+              <thead>
+                <tr><th>Data</th><th>Item</th><th>Quantidade</th><th>Motivo</th><th>Prejuízo estimado</th></tr>
+              </thead>
+              <tbody id="desperdicioTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sugestoes-box">
+          <h3>💡 Sugestões para reduzir o desperdício</h3>
+          <div id="sugestoesDesperdicio"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© <span id="anoAtual"></span> SGK — Sistema Gerenciador Culinário Kennedy</span>
+      <span>💚 Feito para apoiar quem cuida da alimentação na escola</span>
+    </footer>
+  </div>
+
+  <!-- ===== Modal genérico ===== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h3 id="modalTitle">Título</h3>
+        <button class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

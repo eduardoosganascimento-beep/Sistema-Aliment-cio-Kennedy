@@ -1,0 +1,10 @@
+# SGK — Sistema Gerenciador Kennedy
+# Blueprint de deploy para Render (site estático gratuito)
+services:
+  - type: web
+    name: sgk-kennedy
+    runtime: static
+    branch: main
+    buildCommand: ""
+    staticPublishPath: ./sgk-kennedy
+    autoDeployTrigger: commit
