@@ -9,8 +9,10 @@ const App = {
   secao: "inicio",
   diaCardapio: 0,
   filtroCategoria: "Todas",
+  filtroCategoriaEstoque: "Todas",
   dicaIndex: 0,
   checklist: [],
+  buscaAberta: false,
 
   /* ---------- Utilitários ---------- */
   esc(txt) {
@@ -57,6 +59,17 @@ const App = {
     return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   },
 
+  destacar(txt, termo) {
+    const seguro = this.esc(txt);
+    if (!termo) return seguro;
+    const escTermo = this.esc(termo).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    try {
+      return seguro.replace(new RegExp(escTermo, "gi"), (m) => `<mark class="marcador">${m}</mark>`);
+    } catch (e) {
+      return seguro;
+    }
+  },
+
   toast(msg, tipo = "sucesso") {
     const c = document.getElementById("toastContainer");
     const el = document.createElement("div");
@@ -83,11 +96,12 @@ const App = {
   fecharModal() {
     document.getElementById("modalOverlay").classList.remove("aberto");
     document.body.style.overflow = "";
+    this.buscaAberta = false;
   },
 
   /* ---------- Navegação ---------- */
   irPara(secao) {
-    const diretoraSecoes = ["avisos", "aprovacoes", "relatorio"];
+    const diretoraSecoes = ["aprovacoes", "relatorio"];
     if (this.role !== "diretora" && diretoraSecoes.includes(secao)) {
       this.toast("Essa área é exclusiva da direção pedagógica.", "info");
       return;
@@ -121,11 +135,13 @@ const App = {
     if (e) e.value = this.role;
     const diretora = this.role === "diretora";
     document.querySelectorAll(".nav-diretora").forEach((n) => (n.style.display = diretora ? "" : "none"));
-    document.getElementById("userName").textContent = diretora ? "Diretora Pedagoga" : "Equipe da Cozinha";
-    document.getElementById("userRole").textContent = diretora ? "Coordenação" : "Tia da Cozinha";
+    document.getElementById("userName").textContent = diretora ? "Diretora Pedagoga" : "Cozinheira";
+    document.getElementById("userRole").textContent = diretora ? "Coordenação" : "Cozinheira";
     document.getElementById("userAvatar").textContent = diretora ? "🎓" : "👩‍🍳";
+    const btnNovoAviso = document.getElementById("btnNovoAviso");
+    if (btnNovoAviso) btnNovoAviso.style.display = diretora ? "" : "none";
     localStorage.setItem("sgk_role", this.role);
-    if (!diretora && ["avisos", "aprovacoes", "relatorio"].includes(this.secao)) this.irPara("inicio");
+    if (!diretora && ["aprovacoes", "relatorio"].includes(this.secao)) this.irPara("inicio");
     else this.renderizar();
   },
 
@@ -192,13 +208,32 @@ const App = {
 
   /* ---------- Cardápio ---------- */
   renderCardapio() {
-    const tabs = document.getElementById("semanaTabs");
-    tabs.innerHTML = this.state.cardapio.map((c, i) => `
-      <button class="dia-tab ${i === this.diaCardapio ? "active" : ""}" data-dia="${i}">
-        <span>${c.emoji}</span> ${this.esc(c.dia)}
-      </button>`).join("");
+    const busca = (document.getElementById("buscaCardapio")?.value || "").toLowerCase().trim();
+    let dias = this.state.cardapio;
+    if (busca) {
+      dias = dias.filter(d =>
+        (d.dia + " " + d.cafe + " " + d.almoco + " " + d.lanche + " " + d.sobremesa)
+          .toLowerCase().includes(busca)
+      );
+    }
 
-    const c = this.state.cardapio[this.diaCardapio];
+    const tabs = document.getElementById("semanaTabs");
+    tabs.innerHTML = dias.map((c) => {
+      const i = this.state.cardapio.indexOf(c);
+      return `<button class="dia-tab ${i === this.diaCardapio ? "active" : ""}" data-dia="${i}">
+        <span>${c.emoji}</span> ${this.destacar(c.dia, busca)}
+      </button>`;
+    }).join("");
+
+    const c = dias.find(d => this.state.cardapio.indexOf(d) === this.diaCardapio) || dias[0];
+    if (!c) {
+      document.getElementById("cardapioDetalhe").innerHTML = `<div class="empty-state"><span class="es-ico">🔍</span>
+        <h3>Nenhum dia encontrado</h3><p>Tente outro termo na busca do cardápio.</p></div>`;
+      document.getElementById("cardapioTabela").innerHTML =
+        `<tr><td colspan="5" style="text-align:center;padding:24px">Nenhum resultado.</td></tr>`;
+      return;
+    }
+
     const ref = [
       { ico: "🌅", cor: "bg-orange", label: "Café da manhã", txt: c.cafe },
       { ico: "🍽️", cor: "bg-green", label: "Almoço", txt: c.almoco },
@@ -211,16 +246,16 @@ const App = {
         <div class="refeicoes-grid">
           ${ref.map(r => `<div class="refeicao">
             <div class="re-ico ${r.cor}">${r.ico}</div>
-            <div><span>${r.label}</span><strong>${this.esc(r.txt)}</strong></div>
+            <div><span>${r.label}</span><strong>${this.destacar(r.txt, busca)}</strong></div>
           </div>`).join("")}
         </div>
       </div>`;
 
-    document.getElementById("cardapioTabela").innerHTML = this.state.cardapio.map(dia => `
+    document.getElementById("cardapioTabela").innerHTML = dias.map(dia => `
       <tr>
-        <td class="nome-cell">${dia.emoji} ${this.esc(dia.dia)}</td>
-        <td>${this.esc(dia.cafe)}</td><td>${this.esc(dia.almoco)}</td>
-        <td>${this.esc(dia.lanche)}</td><td>${this.esc(dia.sobremesa)}</td>
+        <td class="nome-cell">${dia.emoji} ${this.destacar(dia.dia, busca)}</td>
+        <td>${this.destacar(dia.cafe, busca)}</td><td>${this.destacar(dia.almoco, busca)}</td>
+        <td>${this.destacar(dia.lanche, busca)}</td><td>${this.destacar(dia.sobremesa, busca)}</td>
       </tr>`).join("");
   },
 
@@ -254,7 +289,10 @@ const App = {
           </div>
         </div>
         <div class="rc-foot">
-          <button class="btn btn-primary btn-sm" data-ver-receita="${r.id}">Ver receita →</button>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn btn-primary btn-sm" data-ver-receita="${r.id}">Ver receita →</button>
+            <button class="icon-action" title="Remover receita" data-del-receita="${r.id}">🗑️</button>
+          </div>
           <span class="rc-num">${r.passos.length} passos · ${r.ingredientes.length} ingredientes</span>
         </div>
       </article>`).join("");
@@ -313,7 +351,7 @@ const App = {
       </div>
       <p class="hint">${this.role === "diretora"
         ? "Como você está com acesso da direção, a receita será publicada já aprovada."
-        : "A receita será enviada para a direção pedagógica aprovar antes de aparecer para a equipe."}</p>
+        : "A receita será enviada para a direção pedagógica aprovar antes de aparecer para a cozinheira."}</p>
     `, `<button class="btn btn-outline" data-fechar-modal>Cancelar</button>
         <button class="btn btn-primary" id="salvarReceita">💾 Enviar receita</button>`);
 
@@ -333,7 +371,7 @@ const App = {
         rendimento: document.getElementById("f_rend").value.trim() || "—",
         dificuldade: "—",
         status: this.role === "diretora" ? "aprovada" : "pendente",
-        descricao: document.getElementById("f_desc").value.trim() || "Receita cadastrada pela equipe da cozinha.",
+        descricao: document.getElementById("f_desc").value.trim() || "Receita cadastrada pela cozinheira.",
         ingredientes: parseLinhas("f_ing", "|"),
         passos: parseLinhas("f_passos", "|"),
         dicas: parseLinhas("f_dicas", "|"),
@@ -354,7 +392,26 @@ const App = {
     return "ok";
   },
 
+  catIcone(c) {
+    return {
+      "Grãos": "🌾", "Mercearia": "🥫", "Hortifruti": "🥬", "Proteínas": "🥩",
+      "Laticínios": "🥛", "Bebidas": "🧃", "Limpeza": "🧽", "Outros": "📦",
+    }[c] || "📦";
+  },
+
+  renderFiltrosEstoque() {
+    const cats = [...new Set(this.state.estoque.map(i => i.categoria))].sort((a, b) => a.localeCompare(b));
+    const opcoes = ["Todas", ...cats];
+    document.getElementById("filtrosEstoque").innerHTML = `<span class="rotulo">📂 Categorias:</span>` +
+      opcoes.map(c => {
+        const n = c === "Todas" ? this.state.estoque.length : this.state.estoque.filter(i => i.categoria === c).length;
+        return `<button class="chip ${this.filtroCategoriaEstoque === c ? "active" : ""}" data-cat-estoque="${this.esc(c)}">
+          ${this.catIcone(c)} ${this.esc(c)} <span style="opacity:.7">(${n})</span></button>`;
+      }).join("");
+  },
+
   renderEstoque() {
+    this.renderFiltrosEstoque();
     const statusInfo = {
       ok: { txt: "OK", cls: "bs-ok" },
       baixo: { txt: "Estoque baixo", cls: "bs-baixo" },
@@ -389,13 +446,29 @@ const App = {
       : `<div class="alerta-item atencao"><span class="ai-ico">✅</span><span><strong>Tudo em ordem!</strong> Nenhum item vencido ou abaixo do mínimo.</span></div>`;
 
     const busca = (document.getElementById("buscaEstoque")?.value || "").toLowerCase().trim();
-    let lista = [...this.state.estoque].sort((a, b) => a.item.localeCompare(b.item));
-    if (busca) lista = lista.filter(i => i.item.toLowerCase().includes(busca) || i.categoria.toLowerCase().includes(busca));
+    let lista = [...this.state.estoque].sort((a, b) =>
+      a.categoria.localeCompare(b.categoria) || a.item.localeCompare(b.item)
+    );
+    if (this.filtroCategoriaEstoque !== "Todas") {
+      lista = lista.filter(i => i.categoria === this.filtroCategoriaEstoque);
+    }
+    if (busca) {
+      lista = lista.filter(i => (i.item + " " + i.categoria).toLowerCase().includes(busca));
+    }
 
-    document.getElementById("estoqueTbody").innerHTML = lista.length ? lista.map(i => {
+    let html = "";
+    let catAtual = null;
+    lista.forEach(i => {
+      if (i.categoria !== catAtual) {
+        catAtual = i.categoria;
+        const n = lista.filter(x => x.categoria === catAtual).length;
+        html += `<tr class="grupo-categoria"><td colspan="9">
+          <span class="cat-ico">${this.catIcone(catAtual)}</span>${this.esc(catAtual)}
+          <span class="contador-categoria">${n} item(ns)</span></td></tr>`;
+      }
       const s = statusInfo[this.statusEstoque(i)];
-      return `<tr>
-        <td class="nome-cell">${this.esc(i.item)}</td>
+      html += `<tr>
+        <td class="nome-cell">${this.destacar(i.item, busca)}</td>
         <td>${this.esc(i.categoria)}</td>
         <td><strong>${i.qtd}</strong> ${this.esc(i.unidade)}</td>
         <td>${this.fmtMoeda(i.preco || 0)}</td>
@@ -406,10 +479,12 @@ const App = {
         <td><div class="acoes-cell">
           <button class="icon-action" title="Adicionar quantidade" data-add-estoque="${i.id}">＋</button>
           <button class="icon-action" title="Editar" data-edit-estoque="${i.id}">✏️</button>
-          <button class="icon-action" title="Excluir" data-del-estoque="${i.id}">🗑️</button>
+          <button class="icon-action" title="Remover alimento" data-del-estoque="${i.id}">🗑️</button>
         </div></td>
       </tr>`;
-    }).join("") : `<tr><td colspan="9" style="text-align:center;padding:24px">Nenhum item encontrado.</td></tr>`;
+    });
+    document.getElementById("estoqueTbody").innerHTML = html ||
+      `<tr><td colspan="9" style="text-align:center;padding:24px">Nenhum item encontrado nesta categoria ou busca.</td></tr>`;
   },
 
   formEstoque(item) {
@@ -430,7 +505,7 @@ const App = {
         <div class="form-group"><label>Quantidade mínima</label><input id="e_min" type="number" min="0" step="0.1" value="${e.minimo}" /></div>
       </div>
       <div class="form-group"><label>Data de validade</label><input id="e_val" type="date" value="${e.validade}" /></div>
-      <p class="hint">Cadastro disponível para as tias da cozinha e para a direção pedagógica. O valor total é calculado automaticamente (quantidade × preço).</p>
+      <p class="hint">Somente a <strong>Cozinheira</strong> e a <strong>Diretora Pedagoga</strong> podem cadastrar, editar e remover alimentos. O valor total é calculado automaticamente (quantidade × preço).</p>
     `, `<button class="btn btn-outline" data-fechar-modal>Cancelar</button>
         <button class="btn btn-primary" id="salvarItem">💾 Salvar</button>`);
 
@@ -458,12 +533,21 @@ const App = {
 
   /* ---------- Higiene ---------- */
   renderHigiene() {
-    document.getElementById("higieneGrid").innerHTML = this.state.higiene.map(h => `
+    const busca = (document.getElementById("buscaHigiene")?.value || "").toLowerCase().trim();
+    let lista = this.state.higiene;
+    if (busca) {
+      lista = lista.filter(h =>
+        (h.titulo + " " + h.resumo + " " + h.itens.join(" ")).toLowerCase().includes(busca)
+      );
+    }
+    document.getElementById("higieneGrid").innerHTML = lista.length ? lista.map(h => `
       <article class="hig-card cor-${this.esc(h.cor)}">
-        <div class="hig-top"><span class="hig-ico">${h.emoji}</span><h4>${this.esc(h.titulo)}</h4></div>
-        <p>${this.esc(h.resumo)}</p>
-        <ul>${h.itens.map(i => `<li>${this.esc(i)}</li>`).join("")}</ul>
-      </article>`).join("");
+        <div class="hig-top"><span class="hig-ico">${h.emoji}</span><h4>${this.destacar(h.titulo, busca)}</h4></div>
+        <p>${this.destacar(h.resumo, busca)}</p>
+        <ul>${h.itens.map(i => `<li>${this.destacar(i, busca)}</li>`).join("")}</ul>
+      </article>`).join("")
+      : `<div class="empty-state" style="grid-column:1/-1"><span class="es-ico">🔍</span>
+          <h3>Nenhuma dica encontrada</h3><p>Tente outro termo, como "mãos", "geladeira" ou "alergia".</p></div>`;
 
     const itensCheck = [
       "Lavei as mãos com água e sabão antes de começar",
@@ -492,16 +576,23 @@ const App = {
   /* ---------- Avisos ---------- */
   renderAvisos() {
     const icos = { aviso: "📢", sucesso: "✅", info: "ℹ️" };
-    const lista = [...this.state.avisos].sort((a, b) => b.data.localeCompare(a.data));
+    const busca = (document.getElementById("buscaAvisos")?.value || "").toLowerCase().trim();
+    let lista = [...this.state.avisos].sort((a, b) => b.data.localeCompare(a.data));
+    if (busca) {
+      lista = lista.filter(a => (a.titulo + " " + a.texto + " " + a.autor).toLowerCase().includes(busca));
+    }
     document.getElementById("avisosLista").innerHTML = lista.length ? lista.map(a => `
       <article class="aviso-card tipo-${this.esc(a.tipo)} ${!a.lido ? "nao-lido" : ""}">
         <span class="aviso-ico">${icos[a.tipo] || "📢"}</span>
         <div class="aviso-conteudo">
-          <h4>${this.esc(a.titulo)} ${!a.lido ? '<span class="tag-novo">NOVO</span>' : ""}</h4>
-          <p>${this.esc(a.texto)}</p>
+          <h4>${this.destacar(a.titulo, busca)} ${!a.lido ? '<span class="tag-novo">NOVO</span>' : ""}</h4>
+          <p>${this.destacar(a.texto, busca)}</p>
           <div class="aviso-meta">${this.esc(a.autor)} · ${this.fmtData(a.data)}</div>
         </div>
-        ${!a.lido && this.role === "diretora" ? `<button class="btn btn-outline btn-sm" data-marcar-lido="${a.id}">Marcar como lido</button>` : ""}
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${!a.lido && this.role === "diretora" ? `<button class="btn btn-outline btn-sm" data-marcar-lido="${a.id}">Marcar como lido</button>` : ""}
+          <button class="icon-action" title="Remover aviso" data-del-aviso="${a.id}">🗑️</button>
+        </div>
       </article>`).join("")
       : `<div class="empty-state"><span class="es-ico">🔔</span><h3>Nenhum aviso</h3><p>Os avisos da direção aparecerão aqui.</p></div>`;
   },
@@ -623,19 +714,27 @@ const App = {
       </div>`;
 
     // Gráfico por motivo
-    const cores = ["#34d399", "#fbbf24", "#f87171", "#60a5fa", "#c084fc"];
+    const cores = ["#3b82f6", "#22d3ee", "#818cf8", "#f472b6", "#fbbf24"];
     document.getElementById("chartMotivos").innerHTML = motivos.length ? motivos.map(([m, v], i) => `
       <div class="motivo-row">
         <div class="motivo-top"><strong>${this.esc(m)}</strong><span>${this.fmtMoeda(v)}</span></div>
         <div class="motivo-bar-wrap"><div class="motivo-bar" style="width:${(v / (total || 1)) * 100}%;background:${cores[i % cores.length]}"></div></div>
       </div>`).join("") : `<p class="hint">Nenhum registro neste mês.</p>`;
 
-    // Tabela
-    document.getElementById("desperdicioTbody").innerHTML = lista.length ? [...lista].reverse().map(d => `
-      <tr><td>${this.fmtData(d.data)}</td><td class="nome-cell">${this.esc(d.item)}</td>
-      <td>${d.qtd} ${this.esc(d.unidade)}</td><td>${this.esc(d.motivo)}</td>
-      <td><strong>${this.fmtMoeda(d.valor)}</strong></td></tr>`).join("")
-      : `<tr><td colspan="5" style="text-align:center;padding:24px">Nenhum desperdício registrado neste mês. 🎉</td></tr>`;
+    // Tabela (com busca)
+    const busca = (document.getElementById("buscaDesperdicio")?.value || "").toLowerCase().trim();
+    let registros = [...lista].reverse();
+    if (busca) {
+      registros = registros.filter(d =>
+        (d.item + " " + d.motivo + " " + d.unidade + " " + this.fmtData(d.data)).toLowerCase().includes(busca)
+      );
+    }
+    document.getElementById("desperdicioTbody").innerHTML = registros.length ? registros.map(d => `
+      <tr><td>${this.fmtData(d.data)}</td><td class="nome-cell">${this.destacar(d.item, busca)}</td>
+      <td>${d.qtd} ${this.esc(d.unidade)}</td><td>${this.destacar(d.motivo, busca)}</td>
+      <td><strong>${this.fmtMoeda(d.valor)}</strong></td>
+      <td><button class="icon-action" title="Remover registro" data-del-desperdicio="${d.id}">🗑️</button></td></tr>`).join("")
+      : `<tr><td colspan="6" style="text-align:center;padding:24px">${busca ? "Nenhum registro encontrado para essa busca." : "Nenhum desperdício registrado neste mês. 🎉"}</td></tr>`;
 
     // Sugestões
     const sugestoes = [
@@ -704,6 +803,93 @@ const App = {
     this.toast("Relatório exportado em CSV!");
   },
 
+  /* ---------- Busca global ---------- */
+  abrirBuscaGlobal(termo) {
+    if (this.buscaAberta) {
+      const inp = document.getElementById("buscaModalInput");
+      if (inp) { inp.value = termo; this.renderResultadosBusca(termo); }
+      return;
+    }
+    this.buscaAberta = true;
+    this.abrirModal("🔍 Buscar em todo o sistema", `
+      <div class="busca-wrap" style="margin:0 0 16px;width:100%">
+        <span>🔎</span>
+        <input id="buscaModalInput" type="search" placeholder="Receitas, alimentos, cardápio, higiene, avisos..."
+          value="${this.esc(termo)}" />
+      </div>
+      <div id="resultadosBusca"></div>
+      <p class="dica-busca">Digite pelo menos 2 letras. Clique em um resultado para ir até ele.</p>
+    `, `<button class="btn btn-outline" data-fechar-modal>Fechar</button>`);
+
+    const inp = document.getElementById("buscaModalInput");
+    inp.addEventListener("input", () => this.renderResultadosBusca(inp.value));
+    inp.focus();
+    this.renderResultadosBusca(termo);
+  },
+
+  renderResultadosBusca(termo) {
+    const area = document.getElementById("resultadosBusca");
+    if (!area) return;
+    const t = (termo || "").toLowerCase().trim();
+    if (t.length < 2) {
+      area.innerHTML = `<div class="resumo-busca">Digite pelo menos 2 caracteres para buscar.</div>`;
+      return;
+    }
+    const resultados = this.buscarGlobal(t);
+    area.innerHTML = `<div class="resumo-busca">${resultados.length} resultado(s) para "<strong>${this.esc(termo)}</strong>"</div>` +
+      (resultados.length ? resultados.map(r => `
+        <button class="resultado-busca" data-ir-secao="${r.secao}" data-termo-busca="${this.esc(r.termo || "")}">
+          <span class="rb-ico">${r.icone}</span>
+          <span style="flex:1">
+            <span class="rb-tipo">${this.esc(r.tipo)}</span>
+            <span class="rb-titulo">${this.destacar(r.titulo, termo)}</span>
+            <span class="rb-texto">${this.destacar(r.texto, termo)}</span>
+          </span>
+          <span class="rb-ir">Ir →</span>
+        </button>`).join("")
+      : `<div class="empty-state" style="padding:30px"><span class="es-ico">🔍</span>
+          <h3>Nada encontrado</h3><p>Tente outra palavra.</p></div>`);
+  },
+
+  buscarGlobal(t) {
+    const out = [];
+    const add = (tipo, secao, icone, titulo, texto, termo) => {
+      if (out.length < 24) out.push({ tipo, secao, icone, titulo, texto, termo });
+    };
+    const tem = (...partes) => partes.join(" ").toLowerCase().includes(t);
+
+    this.state.receitas.filter(r => r.status === "aprovada" || this.role === "diretora").forEach(r => {
+      if (tem(r.nome, r.descricao, r.categoria, r.ingredientes.map(i => i.item).join(" "), (r.passos || []).join(" "))) {
+        add("Receita", "receitas", r.emoji || "📖", r.nome, r.descricao + " · " + r.categoria, r.nome);
+      }
+    });
+    this.state.estoque.forEach(i => {
+      if (tem(i.item, i.categoria)) {
+        add("Alimento / Estoque", "estoque", "📦", i.item,
+          `${i.qtd} ${i.unidade} · ${i.categoria} · ${this.fmtMoeda(i.preco || 0)}`, i.item);
+      }
+    });
+    this.state.cardapio.forEach(d => {
+      if (tem(d.dia, d.cafe, d.almoco, d.lanche, d.sobremesa)) {
+        add("Cardápio", "cardapio", d.emoji || "📅", d.dia, d.almoco, d.almoco.slice(0, 60));
+      }
+    });
+    this.state.higiene.forEach(h => {
+      if (tem(h.titulo, h.resumo, h.itens.join(" "))) {
+        add("Higiene", "higiene", h.emoji || "🧼", h.titulo, h.resumo, h.titulo);
+      }
+    });
+    this.state.avisos.forEach(a => {
+      if (tem(a.titulo, a.texto, a.autor)) add("Aviso", "avisos", "🔔", a.titulo, a.texto, a.titulo);
+    });
+    this.state.desperdicio.forEach(d => {
+      if (tem(d.item, d.motivo)) {
+        add("Desperdício", "relatorio", "📊", d.item, `${d.motivo} · ${this.fmtData(d.data)}`, d.item);
+      }
+    });
+    return out;
+  },
+
   /* ---------- Eventos ---------- */
   init() {
     this.carregar();
@@ -735,7 +921,7 @@ const App = {
     document.getElementById("roleSelect").addEventListener("change", (e) => {
       this.role = e.target.value;
       this.aplicarRole();
-      this.toast(this.role === "diretora" ? "Acesso da direção ativado." : "Acesso da cozinha ativado.", "info");
+      this.toast(this.role === "diretora" ? "Acesso da direção ativado." : "Acesso de cozinheira ativado.", "info");
     });
 
     // Tema (escuro por padrão)
@@ -749,11 +935,24 @@ const App = {
       btnTema.textContent = claro ? "🌙" : "☀️";
     };
 
-    // Cadastro de alimento disponível para ambos os perfis
+    // Cadastro de alimento disponível para a Cozinheira e a Diretora
     document.getElementById("btnCadastrarAlimento").onclick = () => {
       this.irPara("estoque");
       this.formEstoque();
     };
+
+    // Busca global e buscas por seção
+    document.getElementById("buscaGlobal").addEventListener("input", (e) => {
+      if (e.target.value.trim().length >= 2) this.abrirBuscaGlobal(e.target.value);
+    });
+    document.getElementById("buscaCardapio").addEventListener("input", () => this.renderCardapio());
+    document.getElementById("buscaHigiene").addEventListener("input", () => this.renderHigiene());
+    document.getElementById("buscaAvisos").addEventListener("input", () => this.renderAvisos());
+    document.getElementById("buscaDesperdicio").addEventListener("input", () => this.renderRelatorio());
+    document.getElementById("filtrosEstoque").addEventListener("click", (e) => {
+      const c = e.target.closest("[data-cat-estoque]");
+      if (c) { this.filtroCategoriaEstoque = c.dataset.catEstoque; this.renderEstoque(); }
+    });
 
     document.getElementById("modalClose").onclick = () => this.fecharModal();
     document.getElementById("modalOverlay").addEventListener("click", (e) => {
@@ -786,6 +985,50 @@ const App = {
     });
     document.getElementById("buscaReceita").addEventListener("input", () => this.renderReceitas());
     document.addEventListener("click", (e) => {
+      // Resultado da busca global
+      const ir = e.target.closest("[data-ir-secao]");
+      if (ir) {
+        const secao = ir.dataset.irSecao;
+        const termo = ir.dataset.termoBusca || "";
+        this.fecharModal();
+        this.irPara(secao);
+        const campos = {
+          receitas: "buscaReceita", estoque: "buscaEstoque", cardapio: "buscaCardapio",
+          higiene: "buscaHigiene", avisos: "buscaAvisos", relatorio: "buscaDesperdicio",
+        };
+        const campo = campos[secao];
+        if (campo && termo) {
+          const inp = document.getElementById(campo);
+          if (inp) { inp.value = termo; this.renderizar(); }
+        }
+      }
+
+      // Remover itens cadastrados
+      const dr = e.target.closest("[data-del-receita]");
+      if (dr) {
+        const r = this.state.receitas.find(x => x.id === dr.dataset.delReceita);
+        if (r && confirm(`Remover a receita "${r.nome}"?`)) {
+          this.state.receitas = this.state.receitas.filter(x => x.id !== r.id);
+          this.salvar("receitas"); this.toast("Receita removida.", "info"); this.renderizar();
+        }
+      }
+      const da = e.target.closest("[data-del-aviso]");
+      if (da) {
+        const a = this.state.avisos.find(x => x.id === da.dataset.delAviso);
+        if (a && confirm(`Remover o aviso "${a.titulo}"?`)) {
+          this.state.avisos = this.state.avisos.filter(x => x.id !== a.id);
+          this.salvar("avisos"); this.toast("Aviso removido.", "info"); this.renderAvisos(); this.atualizarBadges();
+        }
+      }
+      const dd = e.target.closest("[data-del-desperdicio]");
+      if (dd) {
+        const d = this.state.desperdicio.find(x => x.id === dd.dataset.delDesperdicio);
+        if (d && confirm(`Remover o registro de desperdício de "${d.item}"?`)) {
+          this.state.desperdicio = this.state.desperdicio.filter(x => x.id !== d.id);
+          this.salvar("desperdicio"); this.toast("Registro removido.", "info"); this.renderRelatorio();
+        }
+      }
+
       const ver = e.target.closest("[data-ver-receita]");
       if (ver) this.verReceita(ver.dataset.verReceita);
       const apr = e.target.closest("[data-aprovar]");

@@ -15,13 +15,16 @@
 
 ## ✨ Funcionalidades
 
-### Para as tias da cozinha
+### Para a cozinheira
 - 📖 **Receitas passo a passo** com ingredientes, modo de preparo e dicas de produtividade
 - 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa)
-- 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (tias e direção podem cadastrar)
+- 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (somente Cozinheira e Diretora)
+- 🗑️ **Remoção de qualquer item cadastrado** (alimentos, receitas, avisos e registros)
 - ⚠️ **Alertas** de estoque baixo e alimentos vencidos
 - 🧼 **Higiene e boas práticas** com checklist diário
-- 🌙 **Modo escuro** (padrão) com opção de tema claro
+- 📂 **Organização por categoria** (Grãos, Mercearia, Hortifruti, Proteínas, etc.)
+- 🔍 **Busca em todo o sistema** e buscas por seção
+- ⚫🔵 **Visual preto e azul**, com opção de tema claro
 
 ### Para a diretora pedagoga
 - 🔔 **Avisos** para a equipe
@@ -30,7 +33,7 @@
 - 🧾 **Exportação CSV** do relatório
 - 👥 Também pode **cadastrar alimentos** com quantidade e preço
 
-O perfil é alternado no canto superior direito (`Tia da Cozinha` / `Diretora Pedagoga`).
+O perfil é alternado no canto superior direito (`Cozinheira` / `Diretora Pedagoga`). Somente esses dois perfis cadastram alimentos com quantidade, preço e data de validade.
 Os dados são salvos no navegador (`localStorage`), então funcionam sem servidor ou banco de dados.
 
 ## 📁 Estrutura

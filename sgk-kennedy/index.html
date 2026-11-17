@@ -42,12 +42,12 @@
       <button class="nav-item" data-section="higiene">
         <span class="nav-icon">🧼</span><span>Higiene e Boas Práticas</span>
       </button>
-
-      <p class="nav-label diretora-label">DIRETORA PEDAGÓGICA</p>
-      <button class="nav-item nav-diretora" data-section="avisos">
+      <button class="nav-item" data-section="avisos">
         <span class="nav-icon">🔔</span><span>Avisos</span>
         <span class="nav-badge alert" id="badgeAvisos">0</span>
       </button>
+
+      <p class="nav-label diretora-label">DIRETORA PEDAGÓGICA</p>
       <button class="nav-item nav-diretora" data-section="aprovacoes">
         <span class="nav-icon">✅</span><span>Aprovar Receitas</span>
         <span class="nav-badge" id="badgeAprovacoes">0</span>
@@ -81,9 +81,13 @@
         <div class="role-switch" title="Alternar perfil de acesso">
           <span class="role-label">Acesso:</span>
           <select id="roleSelect" aria-label="Selecionar perfil">
-            <option value="tia">👩‍🍳 Tia da Cozinha</option>
+            <option value="tia">👩‍🍳 Cozinheira</option>
             <option value="diretora">🎓 Diretora Pedagoga</option>
           </select>
+        </div>
+        <div class="busca-topo">
+          <span class="lupa">🔍</span>
+          <input type="search" id="buscaGlobal" placeholder="Buscar em tudo..." aria-label="Buscar em todo o sistema" />
         </div>
         <button class="icon-btn" id="btnTema" aria-label="Alternar tema" title="Alternar tema claro/escuro">🌙</button>
         <button class="icon-btn" id="btnNotificacoes" aria-label="Notificações" title="Notificações">
@@ -92,8 +96,8 @@
         <div class="user-chip">
           <span class="avatar" id="userAvatar">👩‍🍳</span>
           <div class="user-info">
-            <strong id="userName">Equipe da Cozinha</strong>
-            <span id="userRole">Tia da Cozinha</span>
+            <strong id="userName">Cozinheira</strong>
+            <span id="userRole">Cozinheira</span>
           </div>
         </div>
       </div>
@@ -188,6 +192,12 @@
           </div>
           <button class="btn btn-primary" id="btnImprimirCardapio">🖨️ Imprimir cardápio</button>
         </div>
+        <div class="filtro-categoria-wrap">
+          <span class="rotulo">🔍 Buscar no cardápio:</span>
+          <div class="busca-wrap" style="margin-left:0;width:100%;max-width:360px">
+            <span>🔎</span><input type="search" id="buscaCardapio" placeholder="Ex.: frango, suco, sobremesa..." />
+          </div>
+        </div>
         <div class="semana-tabs" id="semanaTabs"></div>
         <div id="cardapioDetalhe"></div>
         <div class="panel" style="margin-top: 22px;">
@@ -238,11 +248,12 @@
         <div class="page-intro">
           <div>
             <h2>📦 Controle de Estoque</h2>
-            <p>Cadastre alimentos com quantidade, preço e validade. Tias e direção podem gerenciar juntos.</p>
+            <p>Cadastre alimentos com quantidade, preço e validade. Somente a Cozinheira e a Diretora podem gerenciar. Remova qualquer item quando precisar.</p>
           </div>
           <button class="btn btn-primary" id="btnNovoItem">➕ Cadastrar alimento</button>
         </div>
 
+        <div class="filtro-categoria-wrap" id="filtrosEstoque"></div>
         <div class="stats-grid stats-pequeno" id="estoqueStats"></div>
 
         <div class="alerta-box" id="alertaEstoque"></div>
@@ -276,6 +287,12 @@
             <p>Cuidados essenciais para preservar a saúde de todos na escola.</p>
           </div>
         </div>
+        <div class="filtro-categoria-wrap">
+          <span class="rotulo">🔍 Buscar dica:</span>
+          <div class="busca-wrap" style="margin-left:0;width:100%;max-width:340px">
+            <span>🔎</span><input type="search" id="buscaHigiene" placeholder="Ex.: mãos, geladeira, alergia..." />
+          </div>
+        </div>
         <div class="higiene-banner">
           <div class="hb-icon">🛡️</div>
           <div>
@@ -306,6 +323,12 @@
             <p>Comunicações entre a direção e a equipe da cozinha.</p>
           </div>
           <button class="btn btn-primary" id="btnNovoAviso">➕ Criar aviso</button>
+        </div>
+        <div class="filtro-categoria-wrap">
+          <span class="rotulo">🔍 Buscar aviso:</span>
+          <div class="busca-wrap" style="margin-left:0;width:100%;max-width:340px">
+            <span>🔎</span><input type="search" id="buscaAvisos" placeholder="Ex.: manutenção, cardápio, entrega..." />
+          </div>
         </div>
         <div class="avisos-lista" id="avisosLista"></div>
       </section>
@@ -347,12 +370,17 @@
         <div class="panel">
           <div class="panel-head">
             <h3>📋 Registros do mês</h3>
-            <button class="link-btn" id="btnExportar">⬇️ Exportar CSV</button>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <div class="busca-wrap" style="margin-left:0">
+                <span>🔍</span><input type="search" id="buscaDesperdicio" placeholder="Buscar registro..." />
+              </div>
+              <button class="link-btn" id="btnExportar">⬇️ Exportar CSV</button>
+            </div>
           </div>
           <div class="tabela-wrap">
             <table class="tabela">
               <thead>
-                <tr><th>Data</th><th>Item</th><th>Quantidade</th><th>Motivo</th><th>Prejuízo estimado</th></tr>
+                <tr><th>Data</th><th>Item</th><th>Quantidade</th><th>Motivo</th><th>Prejuízo estimado</th><th>Ações</th></tr>
               </thead>
               <tbody id="desperdicioTbody"></tbody>
             </table>
