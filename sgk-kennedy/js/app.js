@@ -3,7 +3,7 @@
    Lógica da aplicação
    ============================================================ */
 
-const SGK_RECEITAS_VERSAO = "3";
+const SGK_RECEITAS_VERSAO = "5";
 
 const App = {
   state: {},
@@ -246,7 +246,7 @@ const App = {
 
     const titulos = {
       inicio: "Início", cardapio: "Cardápio Semanal", receitas: "Receitas",
-      videos: "Vídeos que Ensinam", estoque: "Estoque", higiene: "Higiene e Boas Práticas",
+      videos: "Vídeos", estoque: "Estoque", higiene: "Higiene e Boas Práticas",
       avisos: "Avisos", aprovacoes: "Aprovação de Receitas", relatorio: "Relatório de Desperdício",
     };
     document.getElementById("topbarTitle").textContent = titulos[secao] || "SGK";

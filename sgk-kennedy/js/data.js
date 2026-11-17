@@ -121,7 +121,7 @@ const SGK_DATA = (() => {
       {
         id: "r2",
         nome: "Feijão carioca cremoso para 1.000 alunos",
-        emoji: "🫘",
+        emoji: "🍲",
         categoria: "Acompanhamento",
         tempo: "1h30 (com molho de 12h)",
         rendimento: "1.000 porções (~1.000 alunos)",
