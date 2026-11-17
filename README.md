@@ -16,7 +16,9 @@
 ## ✨ Funcionalidades
 
 ### Para a cozinheira
-- 📖 **Receitas passo a passo** com ingredientes, modo de preparo e dicas de produtividade
+- 📖 **Receitas passo a passo para ~1.000 alunos**: arroz, feijão, nugget, salada com tempero, carne, macarrão, suco e café
+- 🎥 **Vídeos que ensinam**: links do YouTube organizados por tema (como fazer, macetes, quantidades e segurança)
+- 🍽️ **Porcionamento por aluno** e quantidades calculadas para a escola
 - 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa)
 - 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (somente Cozinheira e Diretora)
 - 🗑️ **Remoção de qualquer item cadastrado** (alimentos, receitas, avisos e registros)
@@ -28,13 +30,22 @@
 
 ### Para a diretora pedagoga
 - 🔔 **Avisos** para a equipe
-- ✅ **Aprovação de receitas** enviadas pelas tias
+- ✅ **Aprovação de receitas** enviadas pelas cozinheiras
 - 📊 **Relatório mensal de desperdício** com gráficos, prejuízo estimado e sugestões
 - 🧾 **Exportação CSV** do relatório
 - 👥 Também pode **cadastrar alimentos** com quantidade e preço
 
 O perfil é alternado no canto superior direito (`Cozinheira` / `Diretora Pedagoga`). Somente esses dois perfis cadastram alimentos com quantidade, preço e data de validade.
 Os dados são salvos no navegador (`localStorage`), então funcionam sem servidor ou banco de dados.
+
+## 🔐 Acesso de teste
+
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| 👩‍🍳 Cozinheira | `cozinheira@kennedy.escola.br` | `kennedy123` |
+| 🎓 Diretora Pedagoga | `diretora@kennedy.escola.br` | `kennedy123` |
+
+Também é possível criar novas contas na aba **Criar conta** da tela de login.
 
 ## 📁 Estrutura
 
@@ -45,6 +56,7 @@ Sistema-Aliment-cio-Kennedy/
 │   ├── css/styles.css      # Visual dark mode + responsivo
 │   └── js/
 │       ├── data.js         # Dados iniciais (cardápio, receitas, estoque, etc.)
+│       ├── videos-data.js  # Catálogo de vídeos do YouTube por tema
 │       └── app.js          # Lógica e interações
 ├── render.yaml             # Blueprint de deploy no Render
 └── README.md

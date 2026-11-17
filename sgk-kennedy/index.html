@@ -6,9 +6,75 @@
   <meta name="description" content="SGK — Sistema Gerenciador Culinário Kennedy. Gestão de cozinha escolar, receitas, estoque, higiene e relatórios para a direção." />
   <meta name="theme-color" content="#1f7a4d" />
   <title>SGK — Sistema Gerenciador Kennedy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+  <!-- ===== Tela de login ===== -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-logo">SGK</div>
+        <span class="login-eyebrow">Sistema Gerenciador Kennedy</span>
+        <h2>Bem-vinda de volta!</h2>
+        <p>Entre com sua conta para cuidar da alimentação na escola.</p>
+        <div class="login-ilustracao" aria-hidden="true">
+          <span class="li-prato">🍲</span>
+          <span class="li-item li-a">🥬</span>
+          <span class="li-item li-b">🍅</span>
+          <span class="li-item li-c">🥕</span>
+        </div>
+        <div class="login-brand-foot">💚 Feito com carinho para a cozinha da Kennedy</div>
+      </div>
+
+      <div class="login-form-area">
+        <div class="login-tabs">
+          <button class="login-tab active" data-aba="entrar">Entrar</button>
+          <button class="login-tab" data-aba="criar">Criar conta</button>
+        </div>
+
+        <form class="login-form" id="formLogin">
+          <h3>Acessar o sistema</h3>
+          <p class="login-sub">Use seu e-mail e senha para continuar.</p>
+          <label>E-mail</label>
+          <div class="campo-login"><span>✉️</span><input type="email" id="loginEmail" placeholder="voce@escola.com" autocomplete="username" required /></div>
+          <label>Senha</label>
+          <div class="campo-login"><span>🔒</span><input type="password" id="loginSenha" placeholder="Sua senha" autocomplete="current-password" required /></div>
+          <div class="login-erro" id="loginErro"></div>
+          <button type="submit" class="btn btn-primary login-submit">Entrar no sistema →</button>
+          <div class="login-hint">
+            <strong>Contas para testar:</strong><br />
+            👩‍🍳 cozinheira@kennedy.escola.br<br />
+            🎓 diretora@kennedy.escola.br<br />
+            Senha: <strong>kennedy123</strong>
+          </div>
+        </form>
+
+        <form class="login-form oculto" id="formCriar">
+          <h3>Criar sua conta</h3>
+          <p class="login-sub">Cozinheiras e diretoras podem se cadastrar.</p>
+          <label>Nome</label>
+          <div class="campo-login"><span>👤</span><input type="text" id="criarNome" placeholder="Seu nome" required /></div>
+          <label>E-mail</label>
+          <div class="campo-login"><span>✉️</span><input type="email" id="criarEmail" placeholder="voce@escola.com" required /></div>
+          <label>Senha</label>
+          <div class="campo-login"><span>🔒</span><input type="password" id="criarSenha" placeholder="Mínimo 4 caracteres" minlength="4" required /></div>
+          <label>Perfil</label>
+          <div class="campo-login"><span>🎭</span>
+            <select id="criarPerfil">
+              <option value="tia">👩‍🍳 Cozinheira</option>
+              <option value="diretora">🎓 Diretora Pedagoga</option>
+            </select>
+          </div>
+          <div class="login-erro" id="criarErro"></div>
+          <button type="submit" class="btn btn-primary login-submit">Criar conta e entrar →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Overlay de fundo (mobile) ===== -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -34,6 +100,10 @@
       <button class="nav-item" data-section="receitas">
         <span class="nav-icon">📖</span><span>Receitas</span>
         <span class="nav-badge" id="badgeReceitas">0</span>
+      </button>
+      <button class="nav-item" data-section="videos">
+        <span class="nav-icon">🎥</span><span>Vídeos que ensinam</span>
+        <span class="nav-badge" id="badgeVideos">0</span>
       </button>
       <button class="nav-item" data-section="estoque">
         <span class="nav-icon">📦</span><span>Estoque</span>
@@ -90,6 +160,7 @@
           <input type="search" id="buscaGlobal" placeholder="Buscar em tudo..." aria-label="Buscar em todo o sistema" />
         </div>
         <button class="icon-btn" id="btnTema" aria-label="Alternar tema" title="Alternar tema claro/escuro">🌙</button>
+        <button class="icon-btn" id="btnSair" aria-label="Sair da conta" title="Sair da conta">🚪</button>
         <button class="icon-btn" id="btnNotificacoes" aria-label="Notificações" title="Notificações">
           🔔<span class="dot" id="notifDot"></span>
         </button>
@@ -163,6 +234,12 @@
             <span>Boas práticas para uma cozinha segura e saudável.</span>
             <span class="qc-arrow">Acessar →</span>
           </button>
+          <button class="quick-card qc-cyan" data-go="videos">
+            <span class="qc-icon">🎥</span>
+            <strong>Vídeos que ensinam</strong>
+            <span>Aulas e macetes do YouTube para cozinhar melhor em grande quantidade.</span>
+            <span class="qc-arrow">Assistir →</span>
+          </button>
         </div>
 
         <div class="two-col">
@@ -224,7 +301,10 @@
             <h2>📖 Receitas passo a passo</h2>
             <p>Preparo eficiente, produtivo e seguro para a cozinha escolar.</p>
           </div>
-          <button class="btn btn-primary" id="btnNovaReceita">➕ Nova receita</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline" data-go="videos">🎥 Vídeos que ensinam</button>
+            <button class="btn btn-primary" id="btnNovaReceita">➕ Nova receita</button>
+          </div>
         </div>
 
         <div class="filtros" id="filtrosReceitas">
@@ -232,7 +312,6 @@
           <button class="chip" data-cat="Prato principal">Pratos principais</button>
           <button class="chip" data-cat="Acompanhamento">Acompanhamentos</button>
           <button class="chip" data-cat="Salada">Saladas</button>
-          <button class="chip" data-cat="Sobremesa">Sobremesas</button>
           <button class="chip" data-cat="Bebida">Bebidas</button>
           <div class="busca-wrap">
             <span>🔍</span>
@@ -241,6 +320,45 @@
         </div>
 
         <div class="receitas-grid" id="receitasGrid"></div>
+      </section>
+
+      <!-- SEÇÃO: VÍDEOS -->
+      <section class="section" id="section-videos">
+        <div class="page-intro">
+          <div>
+            <h2>🎥 Vídeos que ensinam</h2>
+            <p>Aulas, receitas e macetes do YouTube organizados por tema. Aprenda vendo e depois aplique na cozinha da escola.</p>
+          </div>
+          <a class="btn btn-outline" href="https://www.youtube.com/results?search_query=receitas+cozinha+escolar+grande+quantidade" target="_blank" rel="noopener">
+            🔎 Buscar mais no YouTube
+          </a>
+        </div>
+
+        <div class="aviso-video">
+          <span class="av-ico">💡</span>
+          <div>
+            <strong>Como usar os vídeos</strong>
+            <p>Os vídeos ensinam a técnica. As quantidades da escola estão nas receitas: sempre confira o rendimento e ajuste para os ~1.000 alunos.</p>
+          </div>
+        </div>
+
+        <div class="filtros" id="filtrosVideos">
+          <button class="chip active" data-video-cat="Todas">Todas</button>
+          <button class="chip" data-video-cat="Arroz">🍚 Arroz</button>
+          <button class="chip" data-video-cat="Feijão">🫘 Feijão</button>
+          <button class="chip" data-video-cat="Nuggets">🍗 Nuggets</button>
+          <button class="chip" data-video-cat="Saladas e temperos">🥗 Saladas e temperos</button>
+          <button class="chip" data-video-cat="Carnes">🥩 Carnes</button>
+          <button class="chip" data-video-cat="Massas">🍝 Massas</button>
+          <button class="chip" data-video-cat="Bebidas">🥤 Bebidas</button>
+          <button class="chip" data-video-cat="Higiene e segurança">🧼 Higiene e segurança</button>
+          <div class="busca-wrap">
+            <span>🔍</span>
+            <input type="search" id="buscaVideo" placeholder="Buscar vídeo, canal ou tema..." />
+          </div>
+        </div>
+
+        <div class="videos-grid" id="videosGrid"></div>
       </section>
 
       <!-- SEÇÃO: ESTOQUE -->
@@ -416,6 +534,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="js/data.js"></script>
+  <script src="js/videos-data.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -3,13 +3,18 @@
    Lógica da aplicação
    ============================================================ */
 
+const SGK_RECEITAS_VERSAO = "3";
+
 const App = {
   state: {},
   role: "tia",
+  usuario: null,
+  contas: [],
   secao: "inicio",
   diaCardapio: 0,
   filtroCategoria: "Todas",
   filtroCategoriaEstoque: "Todas",
+  filtroVideo: "Todas",
   dicaIndex: 0,
   checklist: [],
   buscaAberta: false,
@@ -25,19 +30,142 @@ const App = {
     const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio"];
     chaves.forEach((chave) => {
       try {
-        const salvo = localStorage.getItem("sgk_" + chave);
-        this.state[chave] = salvo ? JSON.parse(salvo) : JSON.parse(JSON.stringify(SGK_DATA[chave]));
+        const salvo = localStorage.getItem("sgk2_" + chave);
+        this.state[chave] = salvo
+          ? JSON.parse(salvo)
+          : JSON.parse(JSON.stringify(SGK_DATA[chave] || []));
       } catch (e) {
-        this.state[chave] = JSON.parse(JSON.stringify(SGK_DATA[chave]));
+        this.state[chave] = JSON.parse(JSON.stringify(SGK_DATA[chave] || []));
       }
     });
 
-    this.role = localStorage.getItem("sgk_role") || "tia";
-    this.checklist = JSON.parse(localStorage.getItem("sgk_checklist") || "[]");
+    // Atualiza as receitas-modelo quando o conteúdo didático muda de versão
+    if (localStorage.getItem("sgk2_receitas_versao") !== SGK_RECEITAS_VERSAO) {
+      this.state.receitas = JSON.parse(JSON.stringify(SGK_DATA.receitas || []));
+      localStorage.setItem("sgk2_receitas", JSON.stringify(this.state.receitas));
+      localStorage.setItem("sgk2_receitas_versao", SGK_RECEITAS_VERSAO);
+    }
+
+    // Catálogo de vídeos (conteúdo fixo, sempre atualizado pelo arquivo)
+    this.state.videos = typeof SGK_VIDEOS !== "undefined" ? SGK_VIDEOS : [];
+
+    this.role = localStorage.getItem("sgk2_role") || "tia";
+    this.checklist = JSON.parse(localStorage.getItem("sgk2_checklist") || "[]");
+    this.carregarContas();
+  },
+
+  carregarContas() {
+    const senhaPadrao = this.hashSenha("kennedy123");
+    const padrao = [
+      { email: "cozinheira@kennedy.escola.br", senha: senhaPadrao, nome: "Cozinheira", perfil: "tia" },
+      { email: "diretora@kennedy.escola.br", senha: senhaPadrao, nome: "Diretora Pedagoga", perfil: "diretora" },
+    ];
+    try {
+      const salvo = JSON.parse(localStorage.getItem("sgk2_contas"));
+      this.contas = Array.isArray(salvo) && salvo.length ? salvo : padrao;
+    } catch (e) {
+      this.contas = padrao;
+    }
+    // Migra contas antigas que guardavam a senha sem hash
+    this.contas.forEach((c) => {
+      if (!String(c.senha).startsWith("h")) c.senha = this.hashSenha(c.senha);
+    });
+    this.salvarContas();
+  },
+
+  salvarContas() {
+    localStorage.setItem("sgk2_contas", JSON.stringify(this.contas));
+  },
+
+  hashSenha(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    return "h" + Math.abs(h).toString(36);
+  },
+
+  verificarSessao() {
+    const email = localStorage.getItem("sgk2_sessao");
+    const conta = this.contas.find((c) => c.email === email);
+    if (conta) {
+      this.usuario = conta;
+      this.role = conta.perfil;
+      return true;
+    }
+    return false;
+  },
+
+  entrar(conta) {
+    this.usuario = conta;
+    this.role = conta.perfil;
+    localStorage.setItem("sgk2_sessao", conta.email);
+    localStorage.setItem("sgk2_role", conta.perfil);
+    document.getElementById("loginScreen").classList.add("oculto");
+    this.aplicarRole();
+    this.irPara("inicio");
+    this.toast(`Olá, ${conta.nome}! Bem-vinda ao SGK.`);
+  },
+
+  sair() {
+    localStorage.removeItem("sgk2_sessao");
+    this.usuario = null;
+    document.getElementById("loginScreen").classList.remove("oculto");
+    document.getElementById("loginEmail").value = "";
+    document.getElementById("loginSenha").value = "";
+    document.getElementById("loginErro").textContent = "";
+  },
+
+  initLogin() {
+    const tabs = document.querySelectorAll(".login-tab");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((t) => t.classList.toggle("active", t === tab));
+        const criar = tab.dataset.aba === "criar";
+        document.getElementById("formLogin").classList.toggle("oculto", criar);
+        document.getElementById("formCriar").classList.toggle("oculto", !criar);
+        document.getElementById("loginErro").textContent = "";
+        document.getElementById("criarErro").textContent = "";
+      });
+    });
+
+    document.getElementById("formLogin").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const senha = document.getElementById("loginSenha").value;
+      const conta = this.contas.find((c) => c.email === email && c.senha === this.hashSenha(senha));
+      const erro = document.getElementById("loginErro");
+      if (!conta) {
+        erro.textContent = "E-mail ou senha incorretos. Tente novamente.";
+        return;
+      }
+      erro.textContent = "";
+      this.entrar(conta);
+    });
+
+    document.getElementById("formCriar").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nome = document.getElementById("criarNome").value.trim();
+      const email = document.getElementById("criarEmail").value.trim().toLowerCase();
+      const senha = document.getElementById("criarSenha").value;
+      const perfil = document.getElementById("criarPerfil").value;
+      const erro = document.getElementById("criarErro");
+      if (!nome || !email.includes("@") || senha.length < 4) {
+        erro.textContent = "Preencha nome, e-mail válido e senha com pelo menos 4 caracteres.";
+        return;
+      }
+      if (this.contas.some((c) => c.email === email)) {
+        erro.textContent = "Já existe uma conta com esse e-mail.";
+        return;
+      }
+      const conta = { nome, email, senha: this.hashSenha(senha), perfil };
+      this.contas.push(conta);
+      this.salvarContas();
+      erro.textContent = "";
+      this.entrar(conta);
+    });
   },
 
   salvar(chave) {
-    localStorage.setItem("sgk_" + chave, JSON.stringify(this.state[chave]));
+    localStorage.setItem("sgk2_" + chave, JSON.stringify(this.state[chave]));
   },
 
   hojeISO() {
@@ -118,7 +246,7 @@ const App = {
 
     const titulos = {
       inicio: "Início", cardapio: "Cardápio Semanal", receitas: "Receitas",
-      estoque: "Estoque", higiene: "Higiene e Boas Práticas",
+      videos: "Vídeos que Ensinam", estoque: "Estoque", higiene: "Higiene e Boas Práticas",
       avisos: "Avisos", aprovacoes: "Aprovação de Receitas", relatorio: "Relatório de Desperdício",
     };
     document.getElementById("topbarTitle").textContent = titulos[secao] || "SGK";
@@ -132,15 +260,20 @@ const App = {
 
   aplicarRole() {
     const e = document.getElementById("roleSelect");
-    if (e) e.value = this.role;
+    if (e) {
+      e.value = this.role;
+      e.disabled = !!this.usuario && this.usuario.perfil !== "diretora";
+      e.title = e.disabled ? "Seu perfil é fixo. Use outra conta para trocar." : "Alternar perfil de acesso";
+    }
     const diretora = this.role === "diretora";
     document.querySelectorAll(".nav-diretora").forEach((n) => (n.style.display = diretora ? "" : "none"));
-    document.getElementById("userName").textContent = diretora ? "Diretora Pedagoga" : "Cozinheira";
+    const nome = this.usuario?.nome || (diretora ? "Diretora Pedagoga" : "Cozinheira");
+    document.getElementById("userName").textContent = nome;
     document.getElementById("userRole").textContent = diretora ? "Coordenação" : "Cozinheira";
     document.getElementById("userAvatar").textContent = diretora ? "🎓" : "👩‍🍳";
     const btnNovoAviso = document.getElementById("btnNovoAviso");
     if (btnNovoAviso) btnNovoAviso.style.display = diretora ? "" : "none";
-    localStorage.setItem("sgk_role", this.role);
+    localStorage.setItem("sgk2_role", this.role);
     if (!diretora && ["aprovacoes", "relatorio"].includes(this.secao)) this.irPara("inicio");
     else this.renderizar();
   },
@@ -151,6 +284,7 @@ const App = {
       case "inicio": this.renderInicio(); break;
       case "cardapio": this.renderCardapio(); break;
       case "receitas": this.renderReceitas(); break;
+      case "videos": this.renderVideos(); break;
       case "estoque": this.renderEstoque(); break;
       case "higiene": this.renderHigiene(); break;
       case "avisos": this.renderAvisos(); break;
@@ -170,6 +304,7 @@ const App = {
       el.classList.toggle("zero", !v);
     };
     set("badgeReceitas", this.state.receitas.filter((r) => r.status === "aprovada").length);
+    set("badgeVideos", (this.state.videos || []).length);
     set("badgeEstoque", criticos);
     set("badgeAvisos", naoLidos);
     set("badgeAprovacoes", pendentes);
@@ -298,9 +433,78 @@ const App = {
       </article>`).join("");
   },
 
+  /* ---------- Vídeos ---------- */
+  videoPorId(id) {
+    return (this.state.videos || []).find(v => v.id === id) || null;
+  },
+
+  videosDaReceita(r) {
+    return (r.videos || []).map(id => this.videoPorId(id) || {
+      id, titulo: "Vídeo da receita", canal: "YouTube", tipo: "Vídeo aula",
+    });
+  },
+
+  videoCard(v) {
+    const thumb = `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`;
+    return `<article class="video-card">
+      <a class="video-thumb" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener" title="Assistir no YouTube">
+        <img src="${thumb}" alt="Capa do vídeo: ${this.esc(v.titulo)}" loading="lazy" />
+        <span class="video-play">▶</span>
+        <span class="video-tipo">${this.esc(v.tipo)}</span>
+      </a>
+      <div class="video-body">
+        <span class="video-cat">${this.esc(v.categoria)}</span>
+        <h4>${this.esc(v.titulo)}</h4>
+        <p>${this.esc(v.descricao || "")}</p>
+        <div class="video-meta">
+          <span>📺 ${this.esc(v.canal)}</span>
+          ${v.duracao ? `<span>⏱️ ${this.esc(v.duracao)}</span>` : ""}
+        </div>
+      </div>
+      <a class="video-link" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Assistir no YouTube ↗</a>
+    </article>`;
+  },
+
+  renderVideos() {
+    const busca = (document.getElementById("buscaVideo")?.value || "").toLowerCase().trim();
+    let lista = [...(this.state.videos || [])];
+    if (this.filtroVideo !== "Todas") lista = lista.filter(v => v.categoria === this.filtroVideo);
+    if (busca) {
+      lista = lista.filter(v =>
+        (v.titulo + " " + v.canal + " " + v.categoria + " " + (v.descricao || "") + " " + v.tipo).toLowerCase().includes(busca)
+      );
+    }
+
+    const grid = document.getElementById("videosGrid");
+    if (!grid) return;
+    if (!lista.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <span class="es-ico">🎥</span><h3>Nenhum vídeo encontrado</h3>
+        <p>Tente outro tema ou limpe a busca.</p></div>`;
+      return;
+    }
+
+    const grupos = {};
+    lista.forEach(v => {
+      (grupos[v.categoria] = grupos[v.categoria] || []).push(v);
+    });
+
+    grid.innerHTML = Object.keys(grupos).map(cat => `
+      <div class="videos-grupo">
+        <div class="videos-grupo-head">
+          <h3>${this.esc(cat)}</h3>
+          <span>${grupos[cat].length} vídeo(s)</span>
+        </div>
+        <div class="videos-lista">
+          ${grupos[cat].map(v => this.videoCard(v)).join("")}
+        </div>
+      </div>`).join("");
+  },
+
   verReceita(id) {
     const r = this.state.receitas.find(x => x.id === id);
     if (!r) return;
+    const videos = this.videosDaReceita(r);
     this.abrirModal(r.nome, `
       <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:6px">
         <div style="font-size:44px">${r.emoji || "🍽️"}</div>
@@ -313,6 +517,18 @@ const App = {
           <p style="font-size:12.5px;color:var(--texto-fraco);margin-top:6px">${this.esc(r.descricao)}</p>
         </div>
       </div>
+      ${r.porcao ? `<div class="porcao-box">
+        <span class="pb-ico">🍽️</span>
+        <div><strong>Porcionamento para ~1.000 alunos</strong><p>${this.esc(r.porcao)}</p></div>
+      </div>` : ""}
+      ${videos.length ? `<div class="modal-section-title">🎥 Vídeos para aprender</div>
+      <div class="receita-videos">
+        ${videos.map(v => `<a class="receita-video" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">
+          <span class="rv-play">▶</span>
+          <span class="rv-info"><strong>${this.esc(v.titulo)}</strong><small>${this.esc(v.canal)} · ${this.esc(v.tipo)}</small></span>
+          <span class="rv-go">↗</span>
+        </a>`).join("")}
+      </div>` : ""}
       <div class="modal-section-title">🛒 Ingredientes</div>
       <div class="modal-ingredientes">
         ${r.ingredientes.map(i => `<div class="ing-item"><span>${this.esc(i.item)}</span><strong>${this.esc(i.qtd)}</strong></div>`).join("")}
@@ -324,6 +540,11 @@ const App = {
         <h4>Como fazer melhor, mais rápido e com segurança</h4>
         <ul>${(r.dicas || []).map(d => `<li>${this.esc(d)}</li>`).join("")}</ul>
       </div>
+      ${(r.higiene || []).length ? `<div class="modal-section-title">🧼 Higiene e segurança</div>
+      <div class="dica-lista higiene-lista">
+        <h4>O que não pode faltar neste preparo</h4>
+        <ul>${r.higiene.map(h => `<li>${this.esc(h)}</li>`).join("")}</ul>
+      </div>` : ""}
     `, `<button class="btn btn-outline" data-fechar-modal>Fechar</button>
         <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir receita</button>`);
   },
@@ -337,8 +558,9 @@ const App = {
       </div>
       <div class="form-row">
         <div class="form-group"><label>Tempo de preparo</label><input id="f_tempo" placeholder="Ex.: 40 min" /></div>
-        <div class="form-group"><label>Rendimento</label><input id="f_rend" placeholder="Ex.: 50 porções" /></div>
+        <div class="form-group"><label>Rendimento</label><input id="f_rend" placeholder="Ex.: 1.000 porções" /></div>
       </div>
+      <div class="form-group"><label>Porcionamento por aluno</label><input id="f_porcao" placeholder="Ex.: 110 g de arroz cozido por aluno" /></div>
       <div class="form-group"><label>Descrição curta</label><textarea id="f_desc" style="min-height:60px" placeholder="Conte um pouco sobre a receita"></textarea></div>
       <div class="form-group"><label>Ingredientes (um por linha: nome | quantidade)</label>
         <textarea id="f_ing" placeholder="Arroz | 5 kg&#10;Água | 9 litros"></textarea>
@@ -349,6 +571,12 @@ const App = {
       <div class="form-group"><label>Dicas de produtividade (uma por linha)</label>
         <textarea id="f_dicas" style="min-height:70px" placeholder="Use água quente para ganhar tempo..."></textarea>
       </div>
+      <div class="form-group"><label>Cuidados de higiene e segurança (uma por linha)</label>
+        <textarea id="f_higiene" style="min-height:70px" placeholder="Lave as mãos antes de começar...&#10;Mantenha o alimento acima de 60 °C..."></textarea>
+      </div>
+      <div class="form-group"><label>Vídeo do YouTube que ensina (link opcional)</label>
+        <input id="f_video" placeholder="https://www.youtube.com/watch?v=..." />
+      </div>
       <p class="hint">${this.role === "diretora"
         ? "Como você está com acesso da direção, a receita será publicada já aprovada."
         : "A receita será enviada para a direção pedagógica aprovar antes de aparecer para a cozinheira."}</p>
@@ -358,23 +586,30 @@ const App = {
     document.getElementById("salvarReceita").onclick = () => {
       const nome = document.getElementById("f_nome").value.trim();
       if (!nome) { this.toast("Informe o nome da receita.", "erro"); return; }
-      const parseLinhas = (id, sep) => document.getElementById(id).value.split("\n")
+      const parseLinhas = (id, comQuantidade = false) => document.getElementById(id).value.split("\n")
         .map(l => l.trim()).filter(Boolean).map(l => {
-          const [a, b] = l.split(sep);
-          return sep === "|" ? { item: (a || "").trim(), qtd: (b || "").trim() } : (a || l).trim();
+          if (!comQuantidade) return l;
+          const [a, b] = l.split("|");
+          return { item: (a || "").trim(), qtd: (b || "").trim() };
         }).filter(x => typeof x === "string" ? x : x.item);
+
+      const linkVideo = document.getElementById("f_video").value.trim();
+      const videoId = (linkVideo.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{11})/) || [])[1] || "";
 
       const r = {
         id: this.uid(), nome, emoji: "🍽️",
         categoria: document.getElementById("f_cat").value,
         tempo: document.getElementById("f_tempo").value.trim() || "—",
         rendimento: document.getElementById("f_rend").value.trim() || "—",
+        porcao: document.getElementById("f_porcao").value.trim(),
         dificuldade: "—",
         status: this.role === "diretora" ? "aprovada" : "pendente",
         descricao: document.getElementById("f_desc").value.trim() || "Receita cadastrada pela cozinheira.",
-        ingredientes: parseLinhas("f_ing", "|"),
-        passos: parseLinhas("f_passos", "|"),
-        dicas: parseLinhas("f_dicas", "|"),
+        ingredientes: parseLinhas("f_ing", true),
+        passos: parseLinhas("f_passos"),
+        dicas: parseLinhas("f_dicas"),
+        higiene: parseLinhas("f_higiene"),
+        videos: videoId ? [videoId] : [],
       };
       this.state.receitas.push(r);
       this.salvar("receitas");
@@ -433,17 +668,29 @@ const App = {
       ].map(s => `<div class="stat-card"><div class="stat-icon ${s[1]}">${s[0]}</div>
         <div class="stat-info"><span>${s[2]}</span><strong style="font-size:${typeof s[3] === "number" ? "22px" : "18px"}">${s[3]}</strong><small>${s[4]}</small></div></div>`).join("")}`;
 
-    document.getElementById("alertaEstoque").innerHTML = criticos.length
-      ? criticos.slice(0, 4).map(i => {
-          const v = this.statusEstoque(i) === "vencido";
-          return `<div class="alerta-item ${v ? "" : "atencao"}">
-            <span class="ai-ico">${v ? "🚫" : "⚠️"}</span>
-            <span><strong>${this.esc(i.item)}</strong> — ${v
-              ? `validade vencida em ${this.fmtData(i.validade)}`
-              : `restam apenas ${i.qtd} ${this.esc(i.unidade)} (mínimo ${i.minimo})`}</span>
-          </div>`;
-        }).join("") + (criticos.length > 4 ? `<p class="hint">+ ${criticos.length - 4} item(ns) na tabela abaixo.</p>` : "")
-      : `<div class="alerta-item atencao"><span class="ai-ico">✅</span><span><strong>Tudo em ordem!</strong> Nenhum item vencido ou abaixo do mínimo.</span></div>`;
+    if (!this.state.estoque.length) {
+      document.getElementById("alertaEstoque").innerHTML = `
+        <div class="alerta-vazio">
+          <span class="av-ico">📦</span>
+          <div class="av-texto">
+            <strong>Nenhum alimento cadastrado ainda</strong>
+            <p>Cadastre os produtos da cozinha com quantidade, preço e data de validade.</p>
+          </div>
+          <button class="btn btn-primary" id="btnPrimeiroAlimento">➕ Cadastrar primeiro alimento</button>
+        </div>`;
+    } else {
+      document.getElementById("alertaEstoque").innerHTML = criticos.length
+        ? criticos.slice(0, 4).map(i => {
+            const v = this.statusEstoque(i) === "vencido";
+            return `<div class="alerta-item ${v ? "" : "atencao"}">
+              <span class="ai-ico">${v ? "🚫" : "⚠️"}</span>
+              <span><strong>${this.esc(i.item)}</strong> — ${v
+                ? `validade vencida em ${this.fmtData(i.validade)}`
+                : `restam apenas ${i.qtd} ${this.esc(i.unidade)} (mínimo ${i.minimo})`}</span>
+            </div>`;
+          }).join("") + (criticos.length > 4 ? `<p class="hint">+ ${criticos.length - 4} item(ns) na tabela abaixo.</p>` : "")
+        : `<div class="alerta-item atencao"><span class="ai-ico">✅</span><span><strong>Tudo em ordem!</strong> Nenhum item vencido ou abaixo do mínimo.</span></div>`;
+    }
 
     const busca = (document.getElementById("buscaEstoque")?.value || "").toLowerCase().trim();
     let lista = [...this.state.estoque].sort((a, b) =>
@@ -887,12 +1134,16 @@ const App = {
         add("Desperdício", "relatorio", "📊", d.item, `${d.motivo} · ${this.fmtData(d.data)}`, d.item);
       }
     });
+    (this.state.videos || []).forEach(v => {
+      if (tem(v.titulo, v.canal, v.categoria, v.descricao, v.tipo)) {
+        add("Vídeo", "videos", "🎥", v.titulo, `${v.canal} · ${v.categoria} · ${v.tipo}`, v.titulo);
+      }
+    });
     return out;
   },
 
   /* ---------- Eventos ---------- */
-  init() {
-    this.carregar();
+  iniciarApp() {
     document.getElementById("anoAtual").textContent = new Date().getFullYear();
     this.aplicarRole();
     this.irPara("inicio");
@@ -925,13 +1176,13 @@ const App = {
     });
 
     // Tema (escuro por padrão)
-    const temaSalvo = localStorage.getItem("sgk_tema") || "escuro";
+    const temaSalvo = localStorage.getItem("sgk2_tema") || "escuro";
     document.body.classList.toggle("claro", temaSalvo === "claro");
     const btnTema = document.getElementById("btnTema");
     btnTema.textContent = temaSalvo === "claro" ? "🌙" : "☀️";
     btnTema.onclick = () => {
       const claro = document.body.classList.toggle("claro");
-      localStorage.setItem("sgk_tema", claro ? "claro" : "escuro");
+      localStorage.setItem("sgk2_tema", claro ? "claro" : "escuro");
       btnTema.textContent = claro ? "🌙" : "☀️";
     };
 
@@ -963,6 +1214,7 @@ const App = {
       if (e.key === "Escape") this.fecharModal();
     });
 
+    document.getElementById("btnSair").onclick = () => this.sair();
     document.getElementById("btnNotificacoes").onclick = () => this.irPara("avisos");
     document.getElementById("novaDica").onclick = () => {
       this.dicaIndex++;
@@ -984,16 +1236,33 @@ const App = {
       this.renderReceitas();
     });
     document.getElementById("buscaReceita").addEventListener("input", () => this.renderReceitas());
+    document.getElementById("filtrosVideos").addEventListener("click", (e) => {
+      const c = e.target.closest("[data-video-cat]");
+      if (!c) return;
+      this.filtroVideo = c.dataset.videoCat;
+      document.querySelectorAll("#filtrosVideos .chip").forEach(x => x.classList.toggle("active", x === c));
+      this.renderVideos();
+    });
+    document.getElementById("buscaVideo").addEventListener("input", () => this.renderVideos());
     document.addEventListener("click", (e) => {
+      const primeiro = e.target.closest("#btnPrimeiroAlimento");
+      if (primeiro) this.formEstoque();
+
       // Resultado da busca global
       const ir = e.target.closest("[data-ir-secao]");
       if (ir) {
         const secao = ir.dataset.irSecao;
         const termo = ir.dataset.termoBusca || "";
         this.fecharModal();
+        if (secao === "videos") {
+          this.filtroVideo = "Todas";
+          document.querySelectorAll("#filtrosVideos .chip").forEach(x =>
+            x.classList.toggle("active", x.dataset.videoCat === "Todas")
+          );
+        }
         this.irPara(secao);
         const campos = {
-          receitas: "buscaReceita", estoque: "buscaEstoque", cardapio: "buscaCardapio",
+          receitas: "buscaReceita", videos: "buscaVideo", estoque: "buscaEstoque", cardapio: "buscaCardapio",
           higiene: "buscaHigiene", avisos: "buscaAvisos", relatorio: "buscaDesperdicio",
         };
         const campo = campos[secao];
@@ -1078,14 +1347,14 @@ const App = {
       const i = Number(c.dataset.check);
       if (c.checked && !this.checklist.includes(i)) this.checklist.push(i);
       if (!c.checked) this.checklist = this.checklist.filter(x => x !== i);
-      localStorage.setItem("sgk_checklist", JSON.stringify(this.checklist));
+      localStorage.setItem("sgk2_checklist", JSON.stringify(this.checklist));
       c.closest(".check-item").classList.toggle("concluido", c.checked);
       this.atualizarProgresso(8);
       if (this.checklist.length === 8) this.toast("Checklist completo! Excelente trabalho 🎉");
     });
     document.getElementById("resetChecklist").onclick = () => {
       this.checklist = [];
-      localStorage.setItem("sgk_checklist", "[]");
+      localStorage.setItem("sgk2_checklist", "[]");
       this.renderHigiene();
       this.toast("Checklist reiniciado.", "info");
     };
@@ -1103,4 +1372,12 @@ const App = {
   },
 };
 
-document.addEventListener("DOMContentLoaded", () => App.init());
+document.addEventListener("DOMContentLoaded", () => {
+  App.carregar();
+  App.initLogin();
+  if (App.verificarSessao()) {
+    App.iniciarApp();
+  } else {
+    document.getElementById("loginScreen").classList.remove("oculto");
+  }
+});
