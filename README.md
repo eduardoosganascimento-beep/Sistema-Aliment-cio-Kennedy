@@ -17,22 +17,22 @@
 
 - 🎨 **Visual preto e azul** (tema “Obsidian Blue”): cartões refinados, brilhos suaves e tipografia mais marcante, com tema claro opcional
 - 📱 **Navegação inferior no celular** com acesso rápido a Início, Cardápio, Receitas e Estoque
-- 🔐 **Sessão mantida ao recarregar** a página (não pede login de novo)
+- 🔐 **Login com escolha de perfil** em cartões (Cozinheira, Pedagoga ou Diretora)
+- 🔑 **Sessão mantida ao recarregar** a página (não pede login de novo)
 - 👁️ **Mostrar/ocultar senha** e botões para preencher as contas de demonstração
 - 🧹 **Contas de teste limpas automaticamente**: contas criadas em sessões anteriores são removidas, mantendo apenas as oficiais
-- 🖨️ **Impressão de receitas** isolada, sem imprimir o menu e os botões do sistema
-- 📅 Data do dia no painel inicial e atalho `/` para buscar em todo o sistema
+- 🍽️ **14 receitas caseiras em 10 porções**, organizadas por categoria (incluindo sobremesas)
 
 ---
 
 ## ✨ Funcionalidades
 
 ### Para a cozinheira
-- 📖 **Receitas caseiras passo a passo** (10 porções): arroz, feijão, nugget, salada, carne, macarrão, suco e café
+- 📖 **14 receitas caseiras passo a passo** (10 porções): arroz, feijão, nugget, salada, carne, macarrão, sopa, purê, frango grelhado, salada de maionese, suco, café e pudim
 - 🎥 **Vídeos que ensinam**: links do YouTube organizados por tema (como fazer, macetes, quantidades e segurança)
 - 🍽️ **Porcionamento simples** e organização das receitas por categoria
 - 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa)
-- 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (somente Cozinheira e Diretora)
+- 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (Cozinheira, Pedagoga e Diretora)
 - 🗑️ **Remoção de qualquer item cadastrado** (alimentos, receitas, avisos e registros)
 - ⚠️ **Alertas** de estoque baixo e alimentos vencidos
 - 🧼 **Higiene e boas práticas** com checklist diário

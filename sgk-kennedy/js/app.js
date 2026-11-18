@@ -3,7 +3,7 @@
    Lógica da aplicação
    ============================================================ */
 
-const SGK_RECEITAS_VERSAO = "6";
+const SGK_RECEITAS_VERSAO = "7";
 
 const App = {
   state: {},
@@ -15,7 +15,6 @@ const App = {
   filtroCategoria: "Todas",
   filtroCategoriaEstoque: "Todas",
   filtroVideo: "Todas",
-  dicaIndex: 0,
   checklist: [],
   buscaAberta: false,
 
@@ -162,22 +161,24 @@ const App = {
       pedagoga: "pedagoga@kennedy.escola.br",
       diretora: "diretora@kennedy.escola.br",
     };
-    const selPerfil = document.getElementById("loginPerfil");
-    if (selPerfil) {
-      selPerfil.addEventListener("change", () => {
-        document.getElementById("loginEmail").value = perfisLogin[selPerfil.value] || "";
-        document.getElementById("loginErro").textContent = "";
+    const opcoesPerfil = [...document.querySelectorAll(".perfil-opcao")];
+    const selecionarPerfil = (perfil) => {
+      opcoesPerfil.forEach((b) => {
+        const ativo = b.dataset.perfil === perfil;
+        b.classList.toggle("active", ativo);
+        b.setAttribute("aria-checked", String(ativo));
       });
-    }
+      document.getElementById("loginEmail").value = perfisLogin[perfil] || "";
+      document.getElementById("loginErro").textContent = "";
+    };
+    opcoesPerfil.forEach((b) => b.addEventListener("click", () => selecionarPerfil(b.dataset.perfil)));
 
     // Contas de demonstração
     document.querySelectorAll("[data-demo]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const perfil = btn.dataset.demo;
-        document.getElementById("loginEmail").value = perfisLogin[perfil] || "";
+        selecionarPerfil(perfil);
         document.getElementById("loginSenha").value = "kennedy123";
-        if (selPerfil) selPerfil.value = perfil;
-        document.getElementById("loginErro").textContent = "";
         document.getElementById("loginSenha").focus();
       });
     });
@@ -407,12 +408,6 @@ const App = {
           <p>${this.esc(a.texto)}</p><small>${this.esc(a.autor)} · ${this.fmtData(a.data)}</small></div>
         </div>`).join("")
       : `<div class="empty-state" style="padding:20px">Nenhum aviso por enquanto.</div>`;
-
-    const dicas = this.state.higiene.flatMap(h => h.itens.map(i => ({ titulo: h.titulo, texto: i })));
-    const d = dicas.length ? dicas[this.dicaIndex % dicas.length] : null;
-    document.getElementById("dicaDia").innerHTML = d
-      ? `<strong>${this.esc(d.titulo)}</strong><br>${this.esc(d.texto)}`
-      : `<strong>Tudo em ordem por aqui.</strong><br>Cadastre dicas de higiene para ver a dica do dia.`;
 
     const hoje = new Date();
     const dataFmt = hoje.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
@@ -1345,11 +1340,6 @@ const App = {
 
     document.getElementById("btnSair").onclick = () => this.sair();
     document.getElementById("btnNotificacoes").onclick = () => this.irPara("avisos");
-    document.getElementById("novaDica").onclick = () => {
-      this.dicaIndex++;
-      this.renderInicio();
-    };
-
     document.getElementById("btnImprimirCardapio").onclick = () => window.print();
     document.getElementById("semanaTabs").addEventListener("click", (e) => {
       const b = e.target.closest("[data-dia]");

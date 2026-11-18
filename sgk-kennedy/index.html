@@ -26,13 +26,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=11" />
+  <link rel="stylesheet" href="css/styles.css?v=12" />
 </head>
 <body>
   <!-- ===== Tela de login ===== -->
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <div class="login-brand">
+        <span class="login-status">Sistema ativo</span>
         <div class="login-logo">SGK</div>
         <span class="login-eyebrow">Sistema Gerenciador Kennedy</span>
         <h2>Bem-vinda de volta!</h2>
@@ -55,13 +56,17 @@
         <form class="login-form" id="formLogin">
           <h3>Acessar o sistema</h3>
           <p class="login-sub">Escolha seu perfil e entre com e-mail e senha.</p>
-          <label for="loginPerfil">Seu perfil</label>
-          <div class="campo-login"><span>🎭</span>
-            <select id="loginPerfil" aria-label="Selecionar perfil no login">
-              <option value="tia">👩‍🍳 Cozinheira</option>
-              <option value="pedagoga">📚 Pedagoga</option>
-              <option value="diretora">🎓 Diretora Pedagoga</option>
-            </select>
+          <label>Seu perfil</label>
+          <div class="perfil-opcoes" role="radiogroup" aria-label="Selecionar perfil no login">
+            <button type="button" class="perfil-opcao active" data-perfil="tia" role="radio" aria-checked="true">
+              <span class="po-ico">👩‍🍳</span><strong>Cozinheira</strong><small>Monta o cardápio</small>
+            </button>
+            <button type="button" class="perfil-opcao" data-perfil="pedagoga" role="radio" aria-checked="false">
+              <span class="po-ico">📚</span><strong>Pedagoga</strong><small>Cadastra alimentos</small>
+            </button>
+            <button type="button" class="perfil-opcao" data-perfil="diretora" role="radio" aria-checked="false">
+              <span class="po-ico">🎓</span><strong>Diretora</strong><small>Aprova e relata</small>
+            </button>
           </div>
           <label for="loginEmail">E-mail</label>
           <div class="campo-login"><span>✉️</span><input type="email" id="loginEmail" placeholder="voce@escola.com" autocomplete="username" required /></div>
@@ -84,6 +89,7 @@
               Senha: <strong>kennedy123</strong>
             </p>
           </div>
+          <p class="login-nota">🔒 Seus dados ficam salvos apenas neste navegador.</p>
         </form>
 
         <form class="login-form oculto" id="formCriar">
@@ -283,19 +289,12 @@
         </div>
 
         <div class="two-col">
-          <div class="panel">
+          <div class="panel" style="grid-column:1/-1">
             <div class="panel-head">
               <h3>🔔 Últimos avisos</h3>
               <button class="link-btn" data-go="avisos">Ver todos →</button>
             </div>
             <div id="homeAvisos" class="mini-list"></div>
-          </div>
-          <div class="panel">
-            <div class="panel-head">
-              <h3>💡 Dica do dia</h3>
-              <button class="link-btn" id="novaDica">Trocar dica ↻</button>
-            </div>
-            <div class="dica-dia" id="dicaDia"></div>
           </div>
         </div>
       </section>
@@ -353,6 +352,7 @@
           <button class="chip" data-cat="Acompanhamento">Acompanhamentos</button>
           <button class="chip" data-cat="Salada">Saladas</button>
           <button class="chip" data-cat="Bebida">Bebidas</button>
+          <button class="chip" data-cat="Sobremesa">Sobremesas</button>
           <div class="busca-wrap">
             <span>🔍</span>
             <input type="search" id="buscaReceita" placeholder="Buscar receita..." />
@@ -583,8 +583,8 @@
   <!-- ===== Toast ===== -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="js/data.js?v=11"></script>
-  <script src="js/videos-data.js?v=11"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/data.js?v=12"></script>
+  <script src="js/videos-data.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
 </body>
 </html>
