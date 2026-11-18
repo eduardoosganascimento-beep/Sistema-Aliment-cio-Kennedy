@@ -13,6 +13,18 @@
 
 ---
 
+## 🆕 Novidades da versão atual
+
+- 🎨 **Visual renovado**: paleta azul/preto mais limpa, cartões refinados e tipografia melhor
+- 📱 **Navegação inferior no celular** com acesso rápido a Início, Cardápio, Receitas e Estoque
+- 🔐 **Sessão mantida ao recarregar** a página (não pede login de novo)
+- 👁️ **Mostrar/ocultar senha** e botões para preencher as contas de demonstração
+- 🟢 **Cores de status mais claras**: verde para OK, amarelo para estoque baixo e vermelho para vencido
+- 🖨️ **Impressão de receitas** isolada, sem imprimir o menu e os botões do sistema
+- 📅 Data do dia no painel inicial e atalho `/` para buscar em todo o sistema
+
+---
+
 ## ✨ Funcionalidades
 
 ### Para a cozinheira
@@ -53,6 +65,7 @@ Também é possível criar novas contas na aba **Criar conta** da tela de login.
 Sistema-Aliment-cio-Kennedy/
 ├── sgk-kennedy/
 │   ├── index.html          # Estrutura do sistema
+│   ├── favicon.svg         # Ícone da aba do navegador
 │   ├── css/styles.css      # Visual dark mode + responsivo
 │   └── js/
 │       ├── data.js         # Dados iniciais (cardápio, receitas, estoque, etc.)

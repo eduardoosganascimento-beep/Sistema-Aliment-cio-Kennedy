@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="SGK — Sistema Gerenciador Culinário Kennedy. Gestão de cozinha escolar, receitas, estoque, higiene e relatórios para a direção." />
-  <meta name="theme-color" content="#1f7a4d" />
+  <meta name="theme-color" content="#060a13" />
   <title>SGK — Sistema Gerenciador Kennedy</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=6" />
+  <link rel="stylesheet" href="css/styles.css?v=7" />
 </head>
 <body>
   <!-- ===== Tela de login ===== -->
@@ -38,10 +39,13 @@
         <form class="login-form" id="formLogin">
           <h3>Acessar o sistema</h3>
           <p class="login-sub">Use seu e-mail e senha para continuar.</p>
-          <label>E-mail</label>
+          <label for="loginEmail">E-mail</label>
           <div class="campo-login"><span>✉️</span><input type="email" id="loginEmail" placeholder="voce@escola.com" autocomplete="username" required /></div>
-          <label>Senha</label>
-          <div class="campo-login"><span>🔒</span><input type="password" id="loginSenha" placeholder="Sua senha" autocomplete="current-password" required /></div>
+          <label for="loginSenha">Senha</label>
+          <div class="campo-login"><span>🔒</span>
+            <input type="password" id="loginSenha" placeholder="Sua senha" autocomplete="current-password" required />
+            <button type="button" class="ver-senha" data-ver-senha="loginSenha" aria-label="Mostrar senha" title="Mostrar senha">👁️</button>
+          </div>
           <div class="login-erro" id="loginErro"></div>
           <button type="submit" class="btn btn-primary login-submit">Entrar no sistema →</button>
           <div class="login-hint">
@@ -49,19 +53,26 @@
             👩‍🍳 cozinheira@kennedy.escola.br<br />
             🎓 diretora@kennedy.escola.br<br />
             Senha: <strong>kennedy123</strong>
+            <div class="login-demo">
+              <button type="button" class="demo-btn" data-demo="cozinheira">👩‍🍳 Usar cozinheira</button>
+              <button type="button" class="demo-btn" data-demo="diretora">🎓 Usar diretora</button>
+            </div>
           </div>
         </form>
 
         <form class="login-form oculto" id="formCriar">
           <h3>Criar sua conta</h3>
           <p class="login-sub">Cozinheiras e diretoras podem se cadastrar.</p>
-          <label>Nome</label>
+          <label for="criarNome">Nome</label>
           <div class="campo-login"><span>👤</span><input type="text" id="criarNome" placeholder="Seu nome" required /></div>
-          <label>E-mail</label>
+          <label for="criarEmail">E-mail</label>
           <div class="campo-login"><span>✉️</span><input type="email" id="criarEmail" placeholder="voce@escola.com" required /></div>
-          <label>Senha</label>
-          <div class="campo-login"><span>🔒</span><input type="password" id="criarSenha" placeholder="Mínimo 4 caracteres" minlength="4" required /></div>
-          <label>Perfil</label>
+          <label for="criarSenha">Senha</label>
+          <div class="campo-login"><span>🔒</span>
+            <input type="password" id="criarSenha" placeholder="Mínimo 4 caracteres" minlength="4" required />
+            <button type="button" class="ver-senha" data-ver-senha="criarSenha" aria-label="Mostrar senha" title="Mostrar senha">👁️</button>
+          </div>
+          <label for="criarPerfil">Perfil</label>
           <div class="campo-login"><span>🎭</span>
             <select id="criarPerfil">
               <option value="tia">👩‍🍳 Cozinheira</option>
@@ -186,6 +197,7 @@
               Tudo o que a cozinha da escola precisa em um só lugar: receitas passo a passo,
               cardápio da semana, controle de estoque, dicas de higiene e relatórios para a direção.
             </p>
+            <span class="hero-date" id="heroDate"></span>
             <div class="hero-actions">
               <button class="btn btn-primary" data-go="receitas">📖 Ver Receitas</button>
               <button class="btn btn-outline" data-go="cardapio">📅 Cardápio da Semana</button>
@@ -518,6 +530,15 @@
     </footer>
   </div>
 
+  <!-- ===== Navegação inferior (mobile) ===== -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navegação rápida">
+    <button data-section="inicio" class="active" aria-label="Início"><span class="bn-ico">🏠</span>Início</button>
+    <button data-section="cardapio" aria-label="Cardápio"><span class="bn-ico">📅</span>Cardápio</button>
+    <button data-section="receitas" aria-label="Receitas"><span class="bn-ico">📖</span>Receitas</button>
+    <button data-section="estoque" aria-label="Estoque"><span class="bn-ico">📦</span>Estoque</button>
+    <button id="bottomMenu" aria-label="Abrir menu completo"><span class="bn-ico">☰</span>Menu</button>
+  </nav>
+
   <!-- ===== Modal genérico ===== -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -531,10 +552,10 @@
   </div>
 
   <!-- ===== Toast ===== -->
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="js/data.js?v=6"></script>
-  <script src="js/videos-data.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/data.js?v=7"></script>
+  <script src="js/videos-data.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

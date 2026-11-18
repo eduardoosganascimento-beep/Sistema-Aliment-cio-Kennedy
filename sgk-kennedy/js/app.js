@@ -106,12 +106,18 @@ const App = {
   },
 
   sair() {
+    this.fecharModal();
     localStorage.removeItem("sgk2_sessao");
     this.usuario = null;
-    document.getElementById("loginScreen").classList.remove("oculto");
+    const busca = document.getElementById("buscaGlobal");
+    if (busca) busca.value = "";
+    const tela = document.getElementById("loginScreen");
+    tela.classList.remove("oculto");
+    tela.scrollTop = 0;
     document.getElementById("loginEmail").value = "";
     document.getElementById("loginSenha").value = "";
     document.getElementById("loginErro").textContent = "";
+    window.scrollTo({ top: 0 });
   },
 
   initLogin() {
@@ -124,6 +130,32 @@ const App = {
         document.getElementById("formCriar").classList.toggle("oculto", !criar);
         document.getElementById("loginErro").textContent = "";
         document.getElementById("criarErro").textContent = "";
+      });
+    });
+
+    // Mostrar / ocultar senha
+    document.querySelectorAll("[data-ver-senha]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const input = document.getElementById(btn.dataset.verSenha);
+        if (!input) return;
+        const mostrar = input.type === "password";
+        input.type = mostrar ? "text" : "password";
+        btn.textContent = mostrar ? "🙈" : "👁️";
+        btn.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+        btn.setAttribute("title", mostrar ? "Ocultar senha" : "Mostrar senha");
+      });
+    });
+
+    // Contas de demonstração
+    document.querySelectorAll("[data-demo]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const diretora = btn.dataset.demo === "diretora";
+        document.getElementById("loginEmail").value = diretora
+          ? "diretora@kennedy.escola.br"
+          : "cozinheira@kennedy.escola.br";
+        document.getElementById("loginSenha").value = "kennedy123";
+        document.getElementById("loginErro").textContent = "";
+        document.getElementById("loginSenha").focus();
       });
     });
 
@@ -218,11 +250,13 @@ const App = {
     document.getElementById("modalFoot").innerHTML =
       rodape || `<button class="btn btn-outline" data-fechar-modal>Fechar</button>`;
     document.getElementById("modalOverlay").classList.add("aberto");
+    document.body.classList.add("modal-aberto");
     document.body.style.overflow = "hidden";
   },
 
   fecharModal() {
     document.getElementById("modalOverlay").classList.remove("aberto");
+    document.body.classList.remove("modal-aberto");
     document.body.style.overflow = "";
     this.buscaAberta = false;
   },
@@ -243,6 +277,19 @@ const App = {
     document.querySelectorAll(".nav-item").forEach((n) =>
       n.classList.toggle("active", n.dataset.section === secao)
     );
+    document.querySelectorAll("#bottomNav [data-section]").forEach((n) => {
+      const ativo = n.dataset.section === secao;
+      n.classList.toggle("active", ativo);
+      if (ativo) n.setAttribute("aria-current", "page");
+      else n.removeAttribute("aria-current");
+    });
+    const naBase = ["inicio", "cardapio", "receitas", "estoque"].includes(secao);
+    const menuBtn = document.getElementById("bottomMenu");
+    if (menuBtn) {
+      menuBtn.classList.toggle("active", !naBase);
+      if (naBase) menuBtn.removeAttribute("aria-current");
+      else menuBtn.setAttribute("aria-current", "page");
+    }
 
     const titulos = {
       inicio: "Início", cardapio: "Cardápio Semanal", receitas: "Receitas",
@@ -269,7 +316,7 @@ const App = {
     document.querySelectorAll(".nav-diretora").forEach((n) => (n.style.display = diretora ? "" : "none"));
     const nome = this.usuario?.nome || (diretora ? "Diretora Pedagoga" : "Cozinheira");
     document.getElementById("userName").textContent = nome;
-    document.getElementById("userRole").textContent = diretora ? "Coordenação" : "Cozinheira";
+    document.getElementById("userRole").textContent = diretora ? "Diretora Pedagoga" : "Cozinheira";
     document.getElementById("userAvatar").textContent = diretora ? "🎓" : "👩‍🍳";
     const btnNovoAviso = document.getElementById("btnNovoAviso");
     if (btnNovoAviso) btnNovoAviso.style.display = diretora ? "" : "none";
@@ -336,9 +383,15 @@ const App = {
       : `<div class="empty-state" style="padding:20px">Nenhum aviso por enquanto.</div>`;
 
     const dicas = this.state.higiene.flatMap(h => h.itens.map(i => ({ titulo: h.titulo, texto: i })));
-    const d = dicas[this.dicaIndex % dicas.length];
-    document.getElementById("dicaDia").innerHTML =
-      `<strong>${this.esc(d.titulo)}</strong><br>${this.esc(d.texto)}`;
+    const d = dicas.length ? dicas[this.dicaIndex % dicas.length] : null;
+    document.getElementById("dicaDia").innerHTML = d
+      ? `<strong>${this.esc(d.titulo)}</strong><br>${this.esc(d.texto)}`
+      : `<strong>Tudo em ordem por aqui.</strong><br>Cadastre dicas de higiene para ver a dica do dia.`;
+
+    const hoje = new Date();
+    const dataFmt = hoje.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+    const elData = document.getElementById("heroDate");
+    if (elData) elData.textContent = "📅 " + dataFmt.charAt(0).toUpperCase() + dataFmt.slice(1);
   },
 
   /* ---------- Cardápio ---------- */
@@ -837,7 +890,7 @@ const App = {
           <div class="aviso-meta">${this.esc(a.autor)} · ${this.fmtData(a.data)}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          ${!a.lido && this.role === "diretora" ? `<button class="btn btn-outline btn-sm" data-marcar-lido="${a.id}">Marcar como lido</button>` : ""}
+          ${!a.lido ? `<button class="btn btn-outline btn-sm" data-marcar-lido="${a.id}">Marcar como lido</button>` : ""}
           <button class="icon-action" title="Remover aviso" data-del-aviso="${a.id}">🗑️</button>
         </div>
       </article>`).join("")
@@ -952,13 +1005,13 @@ const App = {
       semanas[Math.min(4, Math.floor((dia - 1) / 7))] += Number(d.valor || 0);
     });
     const maxSem = Math.max(...semanas, 1);
-    document.getElementById("chartSemanas").innerHTML = `
+    document.getElementById("chartSemanas").innerHTML = lista.length ? `
       <div class="bar-group">
         ${semanas.map((v, i) => `<div class="bar-col">
           <div class="bar" data-valor="${this.fmtMoeda(v)}" style="height:${Math.max(4, (v / maxSem) * 150)}px"></div>
           <div class="bar-label">${i === 4 ? "5ª" : (i + 1) + "ª"} semana</div>
         </div>`).join("")}
-      </div>`;
+      </div>` : `<div class="chart-vazio"><span>📈</span><p>Nenhum desperdício registrado neste mês.<br><small>Os valores aparecerão aqui conforme você registrar.</small></p></div>`;
 
     // Gráfico por motivo
     const cores = ["#3b82f6", "#22d3ee", "#818cf8", "#f472b6", "#fbbf24"];
@@ -1129,11 +1182,13 @@ const App = {
     this.state.avisos.forEach(a => {
       if (tem(a.titulo, a.texto, a.autor)) add("Aviso", "avisos", "🔔", a.titulo, a.texto, a.titulo);
     });
-    this.state.desperdicio.forEach(d => {
-      if (tem(d.item, d.motivo)) {
-        add("Desperdício", "relatorio", "📊", d.item, `${d.motivo} · ${this.fmtData(d.data)}`, d.item);
-      }
-    });
+    if (this.role === "diretora") {
+      this.state.desperdicio.forEach(d => {
+        if (tem(d.item, d.motivo)) {
+          add("Desperdício", "relatorio", "📊", d.item, `${d.motivo} · ${this.fmtData(d.data)}`, d.item);
+        }
+      });
+    }
     (this.state.videos || []).forEach(v => {
       if (tem(v.titulo, v.canal, v.categoria, v.descricao, v.tipo)) {
         add("Vídeo", "videos", "🎥", v.titulo, `${v.canal} · ${v.categoria} · ${v.tipo}`, v.titulo);
@@ -1144,6 +1199,7 @@ const App = {
 
   /* ---------- Eventos ---------- */
   iniciarApp() {
+    document.getElementById("loginScreen").classList.add("oculto");
     document.getElementById("anoAtual").textContent = new Date().getFullYear();
     this.aplicarRole();
     this.irPara("inicio");
@@ -1168,6 +1224,14 @@ const App = {
       document.getElementById("sidebar").classList.remove("aberto");
       document.getElementById("sidebarOverlay").classList.remove("mostrar");
     };
+    document.getElementById("bottomNav").addEventListener("click", (e) => {
+      const secao = e.target.closest("[data-section]");
+      if (secao) { this.irPara(secao.dataset.section); return; }
+      if (e.target.closest("#bottomMenu")) {
+        document.getElementById("sidebar").classList.add("aberto");
+        document.getElementById("sidebarOverlay").classList.add("mostrar");
+      }
+    });
 
     document.getElementById("roleSelect").addEventListener("change", (e) => {
       this.role = e.target.value;
@@ -1211,7 +1275,17 @@ const App = {
       if (e.target.closest("[data-fechar-modal]")) this.fecharModal();
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") this.fecharModal();
+      if (e.key === "Escape") {
+        this.fecharModal();
+        document.getElementById("sidebar").classList.remove("aberto");
+        document.getElementById("sidebarOverlay").classList.remove("mostrar");
+      }
+      const ativo = document.activeElement;
+      const digitando = ativo && /^(INPUT|TEXTAREA|SELECT)$/.test(ativo.tagName);
+      if (e.key === "/" && !digitando) {
+        e.preventDefault();
+        document.getElementById("buscaGlobal").focus();
+      }
     });
 
     document.getElementById("btnSair").onclick = () => this.sair();
