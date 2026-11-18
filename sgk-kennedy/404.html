@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#04050a" />
+  <meta name="robots" content="noindex" />
+  <title>Página não encontrada — SGK</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #04050a;
+      --text: #f2f7ff;
+      --muted: #93a8c9;
+      --azul: #3b82f6;
+      --borda: #1a2540;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 560px at 80% -10%, rgba(37, 99, 235, .24), transparent 62%),
+        radial-gradient(700px 520px at 10% 110%, rgba(34, 211, 238, .08), transparent 62%),
+        var(--bg);
+    }
+    .cartao {
+      width: min(560px, 100%);
+      text-align: center;
+      padding: 48px 32px;
+      border: 1px solid var(--borda);
+      border-radius: 24px;
+      background: rgba(9, 12, 21, .86);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+    }
+    .logo {
+      width: 58px; height: 58px; margin: 0 auto 20px;
+      display: grid; place-items: center;
+      border-radius: 17px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-weight: 800; font-size: 17px; letter-spacing: .5px; color: #fff;
+      background: linear-gradient(145deg, #60a5fa, #2563eb 55%, #0ea5e9);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 12px 34px rgba(37, 99, 235, .45);
+    }
+    .codigo {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 5px 13px;
+      border: 1px solid rgba(96, 165, 250, .3);
+      border-radius: 20px;
+      background: rgba(59, 130, 246, .12);
+      color: #93c5fd;
+      font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
+    }
+    h1 { font-size: 30px; letter-spacing: -.7px; margin-bottom: 10px; }
+    p { color: var(--muted); font-size: 13.5px; line-height: 1.6; }
+    a {
+      display: inline-flex; align-items: center; gap: 7px;
+      margin-top: 26px; padding: 11px 18px;
+      border-radius: 12px;
+      color: #fff; font-size: 13px; font-weight: 700; text-decoration: none;
+      background: linear-gradient(135deg, #4f8dff, #2563eb 55%, #1d4ed8);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 10px 26px rgba(37, 99, 235, .32);
+    }
+    a:hover { filter: brightness(1.07); }
+  </style>
+</head>
+<body>
+  <main class="cartao">
+    <div class="logo">SGK</div>
+    <span class="codigo">ERRO 404</span>
+    <h1>Página não encontrada</h1>
+    <p>O endereço que você tentou acessar não existe ou foi movido. Volte para o sistema para continuar.</p>
+    <a href="/">← Voltar para o início</a>
+  </main>
+</body>
+</html>

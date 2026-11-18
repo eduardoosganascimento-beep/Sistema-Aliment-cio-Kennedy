@@ -15,11 +15,11 @@
 
 ## 🆕 Novidades da versão atual
 
-- 🎨 **Visual renovado**: paleta azul/preto mais limpa, cartões refinados e tipografia melhor
+- 🎨 **Visual preto e azul** (tema “Obsidian Blue”): cartões refinados, brilhos suaves e tipografia mais marcante, com tema claro opcional
 - 📱 **Navegação inferior no celular** com acesso rápido a Início, Cardápio, Receitas e Estoque
 - 🔐 **Sessão mantida ao recarregar** a página (não pede login de novo)
 - 👁️ **Mostrar/ocultar senha** e botões para preencher as contas de demonstração
-- 🟢 **Cores de status mais claras**: verde para OK, amarelo para estoque baixo e vermelho para vencido
+- 🧹 **Contas de teste limpas automaticamente**: contas criadas em sessões anteriores são removidas, mantendo apenas as oficiais
 - 🖨️ **Impressão de receitas** isolada, sem imprimir o menu e os botões do sistema
 - 📅 Data do dia no painel inicial e atalho `/` para buscar em todo o sistema
 
@@ -57,6 +57,9 @@ Os dados são salvos no navegador (`localStorage`), então funcionam sem servido
 | 👩‍🍳 Cozinheira | `cozinheira@kennedy.escola.br` | `kennedy123` |
 | 🎓 Diretora Pedagoga | `diretora@kennedy.escola.br` | `kennedy123` |
 
+> Contas criadas em sessões anteriores são removidas automaticamente ao abrir o
+> sistema atualizado. Use uma das contas oficiais acima para entrar.
+
 Também é possível criar novas contas na aba **Criar conta** da tela de login.
 
 ## 📁 Estrutura
@@ -65,13 +68,17 @@ Também é possível criar novas contas na aba **Criar conta** da tela de login.
 Sistema-Aliment-cio-Kennedy/
 ├── sgk-kennedy/
 │   ├── index.html          # Estrutura do sistema
+│   ├── 404.html            # Página de erro personalizada
 │   ├── favicon.svg         # Ícone da aba do navegador
-│   ├── css/styles.css      # Visual dark mode + responsivo
+│   ├── robots.txt          # Regras para robôs de busca
+│   ├── sitemap.xml         # Mapa do site
+│   ├── css/styles.css      # Tema preto e azul + responsivo
 │   └── js/
 │       ├── data.js         # Dados iniciais (cardápio, receitas, estoque, etc.)
 │       ├── videos-data.js  # Catálogo de vídeos do YouTube por tema
-│       └── app.js          # Lógica e interações
+│       └── app.js          # Lógica, contas, sessão e interações
 ├── render.yaml             # Blueprint de deploy no Render
+├── .gitignore
 └── README.md
 ```
 

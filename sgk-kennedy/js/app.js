@@ -60,6 +60,16 @@ const App = {
       { email: "cozinheira@kennedy.escola.br", senha: senhaPadrao, nome: "Cozinheira", perfil: "tia" },
       { email: "diretora@kennedy.escola.br", senha: senhaPadrao, nome: "Diretora Pedagoga", perfil: "diretora" },
     ];
+
+    // Limpeza única: remove contas criadas em sessões anteriores,
+    // mantendo apenas as contas oficiais do sistema.
+    const VERSAO_CONTAS = 2;
+    const versaoSalva = Number(localStorage.getItem("sgk2_contas_versao") || "0");
+    if (versaoSalva < VERSAO_CONTAS) {
+      localStorage.removeItem("sgk2_contas");
+      localStorage.setItem("sgk2_contas_versao", String(VERSAO_CONTAS));
+    }
+
     try {
       const salvo = JSON.parse(localStorage.getItem("sgk2_contas"));
       this.contas = Array.isArray(salvo) && salvo.length ? salvo : padrao;
@@ -100,8 +110,7 @@ const App = {
     localStorage.setItem("sgk2_sessao", conta.email);
     localStorage.setItem("sgk2_role", conta.perfil);
     document.getElementById("loginScreen").classList.add("oculto");
-    this.aplicarRole();
-    this.irPara("inicio");
+    this.iniciarApp();
     this.toast(`Olá, ${conta.nome}! Bem-vinda ao SGK.`);
   },
 
@@ -567,7 +576,7 @@ const App = {
             <span>👥 ${this.esc(r.rendimento)}</span>
             <span>📊 ${this.esc(r.dificuldade || "—")}</span>
           </div>
-          <p style="font-size:12.5px;color:var(--texto-fraco);margin-top:6px">${this.esc(r.descricao)}</p>
+          <p style="font-size:12.5px;color:var(--muted);margin-top:6px">${this.esc(r.descricao)}</p>
         </div>
       </div>
       ${r.porcao ? `<div class="porcao-box">
@@ -1014,7 +1023,7 @@ const App = {
       </div>` : `<div class="chart-vazio"><span>📈</span><p>Nenhum desperdício registrado neste mês.<br><small>Os valores aparecerão aqui conforme você registrar.</small></p></div>`;
 
     // Gráfico por motivo
-    const cores = ["#3b82f6", "#22d3ee", "#818cf8", "#f472b6", "#fbbf24"];
+    const cores = ["#3b82f6", "#22d3ee", "#60a5fa", "#818cf8", "#38bdf8"];
     document.getElementById("chartMotivos").innerHTML = motivos.length ? motivos.map(([m, v], i) => `
       <div class="motivo-row">
         <div class="motivo-top"><strong>${this.esc(m)}</strong><span>${this.fmtMoeda(v)}</span></div>
@@ -1204,6 +1213,10 @@ const App = {
     this.aplicarRole();
     this.irPara("inicio");
 
+    // Evita duplicar listeners caso o usuário saia e entre novamente
+    if (this._appIniciado) return;
+    this._appIniciado = true;
+
     document.getElementById("sidebarNav").addEventListener("click", (e) => {
       const b = e.target.closest(".nav-item");
       if (b) this.irPara(b.dataset.section);
@@ -1242,12 +1255,18 @@ const App = {
     // Tema (escuro por padrão)
     const temaSalvo = localStorage.getItem("sgk2_tema") || "escuro";
     document.body.classList.toggle("claro", temaSalvo === "claro");
+    const metaTema = document.querySelector('meta[name="theme-color"]');
+    const aplicarMetaTema = (claro) => {
+      if (metaTema) metaTema.setAttribute("content", claro ? "#f4f7fd" : "#04050a");
+    };
+    aplicarMetaTema(temaSalvo === "claro");
     const btnTema = document.getElementById("btnTema");
     btnTema.textContent = temaSalvo === "claro" ? "🌙" : "☀️";
     btnTema.onclick = () => {
       const claro = document.body.classList.toggle("claro");
       localStorage.setItem("sgk2_tema", claro ? "claro" : "escuro");
       btnTema.textContent = claro ? "🌙" : "☀️";
+      aplicarMetaTema(claro);
     };
 
     // Cadastro de alimento disponível para a Cozinheira e a Diretora

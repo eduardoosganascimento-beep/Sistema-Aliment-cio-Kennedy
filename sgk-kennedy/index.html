@@ -2,15 +2,31 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="SGK — Sistema Gerenciador Culinário Kennedy. Gestão de cozinha escolar, receitas, estoque, higiene e relatórios para a direção." />
-  <meta name="theme-color" content="#060a13" />
+  <meta name="application-name" content="SGK Kennedy" />
+  <meta name="theme-color" content="#04050a" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="robots" content="index, follow" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SGK" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SGK — Sistema Gerenciador Kennedy" />
+  <meta property="og:title" content="SGK — Sistema Gerenciador Kennedy" />
+  <meta property="og:description" content="Gestão de cozinha escolar: receitas passo a passo, cardápio semanal, estoque, higiene e relatórios para a direção." />
+  <meta property="og:url" content="https://sgk-kennedy.onrender.com/" />
+  <meta property="og:image" content="https://sgk-kennedy.onrender.com/favicon.svg" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="SGK — Sistema Gerenciador Kennedy" />
+  <meta name="twitter:description" content="Gestão de cozinha escolar: receitas, cardápio, estoque, higiene e relatórios." />
   <title>SGK — Sistema Gerenciador Kennedy</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=7" />
+  <link rel="stylesheet" href="css/styles.css?v=10" />
 </head>
 <body>
   <!-- ===== Tela de login ===== -->
@@ -27,7 +43,7 @@
           <span class="li-item li-b">🍅</span>
           <span class="li-item li-c">🥕</span>
         </div>
-        <div class="login-brand-foot">💚 Feito com carinho para a cozinha da Kennedy</div>
+        <div class="login-brand-foot">💙 Feito com carinho para a cozinha da Kennedy</div>
       </div>
 
       <div class="login-form-area">
@@ -49,14 +65,15 @@
           <div class="login-erro" id="loginErro"></div>
           <button type="submit" class="btn btn-primary login-submit">Entrar no sistema →</button>
           <div class="login-hint">
-            <strong>Contas para testar:</strong><br />
-            👩‍🍳 cozinheira@kennedy.escola.br<br />
-            🎓 diretora@kennedy.escola.br<br />
-            Senha: <strong>kennedy123</strong>
+            <strong>Acesso rápido</strong>
             <div class="login-demo">
               <button type="button" class="demo-btn" data-demo="cozinheira">👩‍🍳 Usar cozinheira</button>
               <button type="button" class="demo-btn" data-demo="diretora">🎓 Usar diretora</button>
             </div>
+            <p class="login-hint-contas">
+              cozinheira@kennedy.escola.br · diretora@kennedy.escola.br<br />
+              Senha: <strong>kennedy123</strong>
+            </p>
           </div>
         </form>
 
@@ -139,7 +156,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="sidebar-footer-icon">💚</div>
+      <div class="sidebar-footer-icon">💙</div>
       <div>
         <strong>Feito com carinho</strong>
         <span>para a cozinha da Kennedy</span>
@@ -526,7 +543,7 @@
 
     <footer class="footer">
       <span>© <span id="anoAtual"></span> SGK — Sistema Gerenciador Culinário Kennedy</span>
-      <span>💚 Feito para apoiar quem cuida da alimentação na escola</span>
+      <span>💙 Feito para apoiar quem cuida da alimentação na escola</span>
     </footer>
   </div>
 
@@ -554,8 +571,8 @@
   <!-- ===== Toast ===== -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="js/data.js?v=7"></script>
-  <script src="js/videos-data.js?v=7"></script>
-  <script src="js/app.js?v=7"></script>
+  <script src="js/data.js?v=10"></script>
+  <script src="js/videos-data.js?v=10"></script>
+  <script src="js/app.js?v=10"></script>
 </body>
 </html>
