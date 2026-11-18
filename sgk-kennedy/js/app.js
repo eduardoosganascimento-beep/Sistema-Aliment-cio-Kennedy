@@ -3,7 +3,7 @@
    Lógica da aplicação
    ============================================================ */
 
-const SGK_RECEITAS_VERSAO = "5";
+const SGK_RECEITAS_VERSAO = "6";
 
 const App = {
   state: {},
@@ -58,12 +58,13 @@ const App = {
     const senhaPadrao = this.hashSenha("kennedy123");
     const padrao = [
       { email: "cozinheira@kennedy.escola.br", senha: senhaPadrao, nome: "Cozinheira", perfil: "tia" },
+      { email: "pedagoga@kennedy.escola.br", senha: senhaPadrao, nome: "Pedagoga", perfil: "pedagoga" },
       { email: "diretora@kennedy.escola.br", senha: senhaPadrao, nome: "Diretora Pedagoga", perfil: "diretora" },
     ];
 
     // Limpeza única: remove contas criadas em sessões anteriores,
     // mantendo apenas as contas oficiais do sistema.
-    const VERSAO_CONTAS = 2;
+    const VERSAO_CONTAS = 3;
     const versaoSalva = Number(localStorage.getItem("sgk2_contas_versao") || "0");
     if (versaoSalva < VERSAO_CONTAS) {
       localStorage.removeItem("sgk2_contas");
@@ -155,14 +156,27 @@ const App = {
       });
     });
 
+    // Perfil na tela de login
+    const perfisLogin = {
+      tia: "cozinheira@kennedy.escola.br",
+      pedagoga: "pedagoga@kennedy.escola.br",
+      diretora: "diretora@kennedy.escola.br",
+    };
+    const selPerfil = document.getElementById("loginPerfil");
+    if (selPerfil) {
+      selPerfil.addEventListener("change", () => {
+        document.getElementById("loginEmail").value = perfisLogin[selPerfil.value] || "";
+        document.getElementById("loginErro").textContent = "";
+      });
+    }
+
     // Contas de demonstração
     document.querySelectorAll("[data-demo]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const diretora = btn.dataset.demo === "diretora";
-        document.getElementById("loginEmail").value = diretora
-          ? "diretora@kennedy.escola.br"
-          : "cozinheira@kennedy.escola.br";
+        const perfil = btn.dataset.demo;
+        document.getElementById("loginEmail").value = perfisLogin[perfil] || "";
         document.getElementById("loginSenha").value = "kennedy123";
+        if (selPerfil) selPerfil.value = perfil;
         document.getElementById("loginErro").textContent = "";
         document.getElementById("loginSenha").focus();
       });
@@ -318,15 +332,18 @@ const App = {
     const e = document.getElementById("roleSelect");
     if (e) {
       e.value = this.role;
-      e.disabled = !!this.usuario && this.usuario.perfil !== "diretora";
+      e.disabled = !!this.usuario && this.role !== "diretora";
       e.title = e.disabled ? "Seu perfil é fixo. Use outra conta para trocar." : "Alternar perfil de acesso";
     }
     const diretora = this.role === "diretora";
+    const rotulos = { tia: "Cozinheira", pedagoga: "Pedagoga", diretora: "Diretora Pedagoga" };
+    const avatares = { tia: "👩‍🍳", pedagoga: "📚", diretora: "🎓" };
+    const rotulo = rotulos[this.role] || rotulos.tia;
     document.querySelectorAll(".nav-diretora").forEach((n) => (n.style.display = diretora ? "" : "none"));
-    const nome = this.usuario?.nome || (diretora ? "Diretora Pedagoga" : "Cozinheira");
+    const nome = this.usuario?.nome || rotulo;
     document.getElementById("userName").textContent = nome;
-    document.getElementById("userRole").textContent = diretora ? "Diretora Pedagoga" : "Cozinheira";
-    document.getElementById("userAvatar").textContent = diretora ? "🎓" : "👩‍🍳";
+    document.getElementById("userRole").textContent = rotulo;
+    document.getElementById("userAvatar").textContent = avatares[this.role] || avatares.tia;
     const btnNovoAviso = document.getElementById("btnNovoAviso");
     if (btnNovoAviso) btnNovoAviso.style.display = diretora ? "" : "none";
     localStorage.setItem("sgk2_role", this.role);
@@ -465,34 +482,53 @@ const App = {
       (r.nome + " " + r.descricao + " " + r.ingredientes.map(i => i.item).join(" ")).toLowerCase().includes(busca)
     );
 
+    const resumo = document.getElementById("resumoReceitas");
+    if (resumo) resumo.textContent = lista.length
+      ? `${lista.length} receita(s) ${busca || this.filtroCategoria !== "Todas" ? "encontrada(s)" : "disponível(is)"}`
+      : "";
+
     const grid = document.getElementById("receitasGrid");
+    if (!grid) return;
     if (!lista.length) {
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
         <span class="es-ico">🔍</span><h3>Nenhuma receita encontrada</h3>
         <p>Tente outro termo ou categoria.</p></div>`;
       return;
     }
-    grid.innerHTML = lista.map(r => `
-      <article class="receita-card">
-        <div class="rc-top">${r.emoji || "🍽️"}
-          <span class="rc-cat">${this.esc(r.categoria)}</span>
+
+    const grupos = {};
+    lista.forEach(r => (grupos[r.categoria] = grupos[r.categoria] || []).push(r));
+
+    grid.innerHTML = Object.keys(grupos).map(cat => `
+      <div class="receitas-grupo">
+        <div class="receitas-grupo-head">
+          <h3>${this.esc(cat)}</h3>
+          <span>${grupos[cat].length} receita(s)</span>
         </div>
-        <div class="rc-body">
-          <h4>${this.esc(r.nome)}</h4>
-          <p>${this.esc(r.descricao)}</p>
-          <div class="rc-meta">
-            <span>⏱️ ${this.esc(r.tempo)}</span>
-            <span>👥 ${this.esc(r.rendimento)}</span>
-          </div>
+        <div class="receitas-grid">
+          ${grupos[cat].map(r => `
+            <article class="receita-card">
+              <div class="rc-top">${r.emoji || "🍽️"}
+                <span class="rc-cat">${this.esc(r.categoria)}</span>
+              </div>
+              <div class="rc-body">
+                <h4>${this.esc(r.nome)}</h4>
+                <p>${this.esc(r.descricao)}</p>
+                <div class="rc-meta">
+                  <span>⏱️ ${this.esc(r.tempo)}</span>
+                  <span>👥 ${this.esc(r.rendimento)}</span>
+                </div>
+              </div>
+              <div class="rc-foot">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <button class="btn btn-primary btn-sm" data-ver-receita="${r.id}">Ver receita →</button>
+                  <button class="icon-action" title="Remover receita" data-del-receita="${r.id}">🗑️</button>
+                </div>
+                <span class="rc-num">${r.passos.length} passos · ${r.ingredientes.length} ingredientes</span>
+              </div>
+            </article>`).join("")}
         </div>
-        <div class="rc-foot">
-          <div style="display:flex;gap:6px;align-items:center">
-            <button class="btn btn-primary btn-sm" data-ver-receita="${r.id}">Ver receita →</button>
-            <button class="icon-action" title="Remover receita" data-del-receita="${r.id}">🗑️</button>
-          </div>
-          <span class="rc-num">${r.passos.length} passos · ${r.ingredientes.length} ingredientes</span>
-        </div>
-      </article>`).join("");
+      </div>`).join("");
   },
 
   /* ---------- Vídeos ---------- */
@@ -581,7 +617,7 @@ const App = {
       </div>
       ${r.porcao ? `<div class="porcao-box">
         <span class="pb-ico">🍽️</span>
-        <div><strong>Porcionamento para ~1.000 alunos</strong><p>${this.esc(r.porcao)}</p></div>
+        <div><strong>Porcionamento</strong><p>${this.esc(r.porcao)}</p></div>
       </div>` : ""}
       ${videos.length ? `<div class="modal-section-title">🎥 Vídeos para aprender</div>
       <div class="receita-videos">
@@ -620,12 +656,12 @@ const App = {
       </div>
       <div class="form-row">
         <div class="form-group"><label>Tempo de preparo</label><input id="f_tempo" placeholder="Ex.: 40 min" /></div>
-        <div class="form-group"><label>Rendimento</label><input id="f_rend" placeholder="Ex.: 1.000 porções" /></div>
+        <div class="form-group"><label>Rendimento</label><input id="f_rend" placeholder="Ex.: 10 porções" /></div>
       </div>
-      <div class="form-group"><label>Porcionamento por aluno</label><input id="f_porcao" placeholder="Ex.: 110 g de arroz cozido por aluno" /></div>
+      <div class="form-group"><label>Porcionamento</label><input id="f_porcao" placeholder="Ex.: 1 porção por pessoa" /></div>
       <div class="form-group"><label>Descrição curta</label><textarea id="f_desc" style="min-height:60px" placeholder="Conte um pouco sobre a receita"></textarea></div>
       <div class="form-group"><label>Ingredientes (um por linha: nome | quantidade)</label>
-        <textarea id="f_ing" placeholder="Arroz | 5 kg&#10;Água | 9 litros"></textarea>
+        <textarea id="f_ing" placeholder="Arroz | 500 g&#10;Água | 900 ml"></textarea>
       </div>
       <div class="form-group"><label>Modo de preparo (um passo por linha)</label>
         <textarea id="f_passos" placeholder="Lave os ingredientes...&#10;Cozinhe em fogo baixo..."></textarea>

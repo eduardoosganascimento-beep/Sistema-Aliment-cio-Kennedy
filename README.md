@@ -28,9 +28,9 @@
 ## ✨ Funcionalidades
 
 ### Para a cozinheira
-- 📖 **Receitas passo a passo para ~1.000 alunos**: arroz, feijão, nugget, salada com tempero, carne, macarrão, suco e café
+- 📖 **Receitas caseiras passo a passo** (10 porções): arroz, feijão, nugget, salada, carne, macarrão, suco e café
 - 🎥 **Vídeos que ensinam**: links do YouTube organizados por tema (como fazer, macetes, quantidades e segurança)
-- 🍽️ **Porcionamento por aluno** e quantidades calculadas para a escola
+- 🍽️ **Porcionamento simples** e organização das receitas por categoria
 - 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa)
 - 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (somente Cozinheira e Diretora)
 - 🗑️ **Remoção de qualquer item cadastrado** (alimentos, receitas, avisos e registros)
@@ -40,6 +40,10 @@
 - 🔍 **Busca em todo o sistema** e buscas por seção
 - ⚫🔵 **Visual preto e azul**, com opção de tema claro
 
+### Para a pedagoga
+- 📦 **Cadastro de alimentos** com quantidade, preço, validade e quantidade mínima
+- 📖 Consulta de receitas, cardápio, higiene e vídeos
+
 ### Para a diretora pedagoga
 - 🔔 **Avisos** para a equipe
 - ✅ **Aprovação de receitas** enviadas pelas cozinheiras
@@ -47,7 +51,8 @@
 - 🧾 **Exportação CSV** do relatório
 - 👥 Também pode **cadastrar alimentos** com quantidade e preço
 
-O perfil é alternado no canto superior direito (`Cozinheira` / `Diretora Pedagoga`). Somente esses dois perfis cadastram alimentos com quantidade, preço e data de validade.
+No login, a pessoa escolhe seu perfil: **Cozinheira**, **Pedagoga** ou **Diretora Pedagoga**.
+A cozinheira monta o cardápio; a pedagoga e a diretora também podem cadastrar alimentos.
 Os dados são salvos no navegador (`localStorage`), então funcionam sem servidor ou banco de dados.
 
 ## 🔐 Acesso de teste
@@ -55,6 +60,7 @@ Os dados são salvos no navegador (`localStorage`), então funcionam sem servido
 | Perfil | E-mail | Senha |
 | --- | --- | --- |
 | 👩‍🍳 Cozinheira | `cozinheira@kennedy.escola.br` | `kennedy123` |
+| 📚 Pedagoga | `pedagoga@kennedy.escola.br` | `kennedy123` |
 | 🎓 Diretora Pedagoga | `diretora@kennedy.escola.br` | `kennedy123` |
 
 > Contas criadas em sessões anteriores são removidas automaticamente ao abrir o

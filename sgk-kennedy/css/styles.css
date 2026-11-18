@@ -639,6 +639,23 @@ body.claro .btn-ghost { background: rgba(255,255,255,.14); color: #fff; }
 .rc-foot .btn { font-size: 11.5px; padding: 7px 12px; }
 .rc-num { font-size: 10.5px; color: var(--muted-2); }
 
+.receitas-grupos { display: flex; flex-direction: column; gap: 28px; }
+.receitas-grupo-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.receitas-grupo-head h3 {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 16px; color: #fff;
+}
+.receitas-grupo-head h3::before {
+  content: ""; width: 3px; height: 16px; border-radius: 3px;
+  background: linear-gradient(180deg, #60a5fa, #22d3ee);
+  box-shadow: 0 0 10px rgba(59,130,246,.5);
+}
+.receitas-grupo-head span { font-size: 11px; color: var(--muted); font-weight: 700; }
+body.claro .receitas-grupo-head h3 { color: var(--text); }
+
 /* Modal receita */
 .modal-ingredientes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 22px; }
 .ing-item { background: rgba(10,15,27,.8); border: 1px solid var(--border-soft); border-radius: 10px; padding: 8px 11px; font-size: 12.5px; display: flex; justify-content: space-between; gap: 8px; }

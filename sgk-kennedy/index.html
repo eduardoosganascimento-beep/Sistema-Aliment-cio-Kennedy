@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=10" />
+  <link rel="stylesheet" href="css/styles.css?v=11" />
 </head>
 <body>
   <!-- ===== Tela de login ===== -->
@@ -54,7 +54,15 @@
 
         <form class="login-form" id="formLogin">
           <h3>Acessar o sistema</h3>
-          <p class="login-sub">Use seu e-mail e senha para continuar.</p>
+          <p class="login-sub">Escolha seu perfil e entre com e-mail e senha.</p>
+          <label for="loginPerfil">Seu perfil</label>
+          <div class="campo-login"><span>🎭</span>
+            <select id="loginPerfil" aria-label="Selecionar perfil no login">
+              <option value="tia">👩‍🍳 Cozinheira</option>
+              <option value="pedagoga">📚 Pedagoga</option>
+              <option value="diretora">🎓 Diretora Pedagoga</option>
+            </select>
+          </div>
           <label for="loginEmail">E-mail</label>
           <div class="campo-login"><span>✉️</span><input type="email" id="loginEmail" placeholder="voce@escola.com" autocomplete="username" required /></div>
           <label for="loginSenha">Senha</label>
@@ -67,11 +75,12 @@
           <div class="login-hint">
             <strong>Acesso rápido</strong>
             <div class="login-demo">
-              <button type="button" class="demo-btn" data-demo="cozinheira">👩‍🍳 Usar cozinheira</button>
+              <button type="button" class="demo-btn" data-demo="tia">👩‍🍳 Usar cozinheira</button>
+              <button type="button" class="demo-btn" data-demo="pedagoga">📚 Usar pedagoga</button>
               <button type="button" class="demo-btn" data-demo="diretora">🎓 Usar diretora</button>
             </div>
             <p class="login-hint-contas">
-              cozinheira@kennedy.escola.br · diretora@kennedy.escola.br<br />
+              cozinheira@ · pedagoga@ · diretora@kennedy.escola.br<br />
               Senha: <strong>kennedy123</strong>
             </p>
           </div>
@@ -93,6 +102,7 @@
           <div class="campo-login"><span>🎭</span>
             <select id="criarPerfil">
               <option value="tia">👩‍🍳 Cozinheira</option>
+              <option value="pedagoga">📚 Pedagoga</option>
               <option value="diretora">🎓 Diretora Pedagoga</option>
             </select>
           </div>
@@ -180,6 +190,7 @@
           <span class="role-label">Acesso:</span>
           <select id="roleSelect" aria-label="Selecionar perfil">
             <option value="tia">👩‍🍳 Cozinheira</option>
+            <option value="pedagoga">📚 Pedagoga</option>
             <option value="diretora">🎓 Diretora Pedagoga</option>
           </select>
         </div>
@@ -348,7 +359,8 @@
           </div>
         </div>
 
-        <div class="receitas-grid" id="receitasGrid"></div>
+        <p class="resumo-busca" id="resumoReceitas"></p>
+        <div class="receitas-grupos" id="receitasGrid"></div>
       </section>
 
       <!-- SEÇÃO: VÍDEOS -->
@@ -367,7 +379,7 @@
           <span class="av-ico">💡</span>
           <div>
             <strong>Como usar os vídeos</strong>
-            <p>Os vídeos ensinam a técnica. As quantidades da escola estão nas receitas: sempre confira o rendimento e ajuste para os ~1.000 alunos.</p>
+            <p>Os vídeos ensinam a técnica. As quantidades estão nas receitas: confira o rendimento antes de preparar.</p>
           </div>
         </div>
 
@@ -571,8 +583,8 @@
   <!-- ===== Toast ===== -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="js/data.js?v=10"></script>
-  <script src="js/videos-data.js?v=10"></script>
-  <script src="js/app.js?v=10"></script>
+  <script src="js/data.js?v=11"></script>
+  <script src="js/videos-data.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>
