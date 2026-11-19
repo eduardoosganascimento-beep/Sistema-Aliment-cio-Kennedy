@@ -21,14 +21,14 @@
 - 🔑 **Sessão mantida ao recarregar** a página (não pede login de novo)
 - 👁️ **Mostrar/ocultar senha** e botões para preencher as contas de demonstração
 - 🧹 **Contas de teste limpas automaticamente**: contas criadas em sessões anteriores são removidas, mantendo apenas as oficiais
-- 🍽️ **14 receitas caseiras em 10 porções**, organizadas por categoria (incluindo sobremesas)
+- 🍽️ **Mais de 1.000 receitas escolares** em 10 porções, organizadas por categoria (incluindo nuggets, carne moída, frango, carnes, bolos salgados, sobremesas e salgados)
 
 ---
 
 ## ✨ Funcionalidades
 
 ### Para a cozinheira
-- 📖 **14 receitas caseiras passo a passo** (10 porções): arroz, feijão, nugget, salada, carne, macarrão, sopa, purê, frango grelhado, salada de maionese, suco, café e pudim
+- 📖 **Mais de 1.000 receitas passo a passo** (10 porções): nuggets, carne moída, frango, carnes, peixes, massas, sopas, saladas, sucos, bolos salgados, bolos e salgados em geral
 - 🎥 **Vídeos que ensinam**: links do YouTube organizados por tema (como fazer, macetes, quantidades e segurança)
 - 🍽️ **Porcionamento simples** e organização das receitas por categoria
 - 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa)
@@ -80,8 +80,9 @@ Sistema-Aliment-cio-Kennedy/
 │   ├── sitemap.xml         # Mapa do site
 │   ├── css/styles.css      # Tema preto e azul + responsivo
 │   └── js/
-│       ├── data.js         # Dados iniciais (cardápio, receitas, estoque, etc.)
-│       ├── videos-data.js  # Catálogo de vídeos do YouTube por tema
+│       ├── data.js            # Dados iniciais (cardápio, receitas base, estoque, etc.)
+│       ├── receitas-extras.js # Catálogo ampliado com mais de 1.000 receitas escolares
+│       ├── videos-data.js     # Catálogo de vídeos do YouTube por tema
 │       └── app.js          # Lógica, contas, sessão e interações
 ├── render.yaml             # Blueprint de deploy no Render
 ├── .gitignore

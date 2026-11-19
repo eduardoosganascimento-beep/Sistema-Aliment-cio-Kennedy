@@ -655,6 +655,8 @@ body.claro .btn-ghost { background: rgba(255,255,255,.14); color: #fff; }
 }
 .receitas-grupo-head span { font-size: 11px; color: var(--muted); font-weight: 700; }
 body.claro .receitas-grupo-head h3 { color: var(--text); }
+.mais-receitas { display: flex; justify-content: center; padding: 8px 0 4px; }
+.mais-receitas .btn { min-width: 260px; }
 
 /* Modal receita */
 .modal-ingredientes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 22px; }

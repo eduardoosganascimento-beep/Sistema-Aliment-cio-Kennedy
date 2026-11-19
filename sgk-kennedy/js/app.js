@@ -3,7 +3,7 @@
    Lógica da aplicação
    ============================================================ */
 
-const SGK_RECEITAS_VERSAO = "7";
+const SGK_RECEITAS_VERSAO = "8";
 
 const App = {
   state: {},
@@ -15,6 +15,7 @@ const App = {
   filtroCategoria: "Todas",
   filtroCategoriaEstoque: "Todas",
   filtroVideo: "Todas",
+  receitasLimit: 60,
   checklist: [],
   buscaAberta: false,
 
@@ -27,20 +28,24 @@ const App = {
 
   carregar() {
     const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio"];
+    // Catálogo base + receitas ampliadas (arquivo separado para não pesar o data.js)
+    const receitasBase = (SGK_DATA.receitas || []).concat(
+      typeof SGK_RECEITAS_EXTRAS !== "undefined" ? SGK_RECEITAS_EXTRAS : []
+    );
     chaves.forEach((chave) => {
       try {
         const salvo = localStorage.getItem("sgk2_" + chave);
         this.state[chave] = salvo
           ? JSON.parse(salvo)
-          : JSON.parse(JSON.stringify(SGK_DATA[chave] || []));
+          : JSON.parse(JSON.stringify(chave === "receitas" ? receitasBase : SGK_DATA[chave] || []));
       } catch (e) {
-        this.state[chave] = JSON.parse(JSON.stringify(SGK_DATA[chave] || []));
+        this.state[chave] = JSON.parse(JSON.stringify(chave === "receitas" ? receitasBase : SGK_DATA[chave] || []));
       }
     });
 
     // Atualiza as receitas-modelo quando o conteúdo didático muda de versão
     if (localStorage.getItem("sgk2_receitas_versao") !== SGK_RECEITAS_VERSAO) {
-      this.state.receitas = JSON.parse(JSON.stringify(SGK_DATA.receitas || []));
+      this.state.receitas = JSON.parse(JSON.stringify(receitasBase));
       localStorage.setItem("sgk2_receitas", JSON.stringify(this.state.receitas));
       localStorage.setItem("sgk2_receitas_versao", SGK_RECEITAS_VERSAO);
     }
@@ -479,7 +484,7 @@ const App = {
 
     const resumo = document.getElementById("resumoReceitas");
     if (resumo) resumo.textContent = lista.length
-      ? `${lista.length} receita(s) ${busca || this.filtroCategoria !== "Todas" ? "encontrada(s)" : "disponível(is)"}`
+      ? `${Math.min(lista.length, this.receitasLimit)} de ${lista.length} receita(s) ${busca || this.filtroCategoria !== "Todas" ? "encontrada(s)" : "disponível(is)"}`
       : "";
 
     const grid = document.getElementById("receitasGrid");
@@ -491,8 +496,9 @@ const App = {
       return;
     }
 
+    const visiveis = lista.slice(0, this.receitasLimit);
     const grupos = {};
-    lista.forEach(r => (grupos[r.categoria] = grupos[r.categoria] || []).push(r));
+    visiveis.forEach(r => (grupos[r.categoria] = grupos[r.categoria] || []).push(r));
 
     grid.innerHTML = Object.keys(grupos).map(cat => `
       <div class="receitas-grupo">
@@ -523,7 +529,11 @@ const App = {
               </div>
             </article>`).join("")}
         </div>
-      </div>`).join("");
+      </div>`).join("") + (lista.length > visiveis.length
+        ? `<div class="mais-receitas">
+             <button class="btn btn-outline" id="maisReceitas">Mostrar mais receitas (${lista.length - visiveis.length} restantes) ↓</button>
+           </div>`
+        : "");
   },
 
   /* ---------- Vídeos ---------- */
@@ -643,7 +653,7 @@ const App = {
   },
 
   novaReceita() {
-    const cats = ["Prato principal", "Acompanhamento", "Salada", "Sobremesa", "Bebida"];
+    const cats = ["Prato principal", "Acompanhamento", "Salada", "Sobremesa", "Bebida", "Salgados"];
     this.abrirModal("➕ Cadastrar nova receita", `
       <div class="form-row">
         <div class="form-group"><label>Nome da receita</label><input id="f_nome" placeholder="Ex.: Sopa de legumes" /></div>
@@ -1351,10 +1361,20 @@ const App = {
       const c = e.target.closest("[data-cat]");
       if (!c) return;
       this.filtroCategoria = c.dataset.cat;
+      this.receitasLimit = 60;
       document.querySelectorAll("#filtrosReceitas .chip").forEach(x => x.classList.toggle("active", x === c));
       this.renderReceitas();
     });
-    document.getElementById("buscaReceita").addEventListener("input", () => this.renderReceitas());
+    document.getElementById("buscaReceita").addEventListener("input", () => {
+      this.receitasLimit = 60;
+      this.renderReceitas();
+    });
+    document.getElementById("receitasGrid").addEventListener("click", (e) => {
+      if (e.target.closest("#maisReceitas")) {
+        this.receitasLimit += 60;
+        this.renderReceitas();
+      }
+    });
     document.getElementById("filtrosVideos").addEventListener("click", (e) => {
       const c = e.target.closest("[data-video-cat]");
       if (!c) return;
