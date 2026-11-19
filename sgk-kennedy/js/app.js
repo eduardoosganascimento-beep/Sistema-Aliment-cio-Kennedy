@@ -14,7 +14,6 @@ const App = {
   diaCardapio: 0,
   filtroCategoria: "Todas",
   filtroCategoriaEstoque: "Todas",
-  filtroVideo: "Todas",
   receitasLimit: 60,
   checklist: [],
   buscaAberta: false,
@@ -27,7 +26,7 @@ const App = {
   },
 
   carregar() {
-    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros"];
+    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades"];
     // Catálogo base + receitas ampliadas (arquivo separado para não pesar o data.js)
     const receitasBase = (SGK_DATA.receitas || []).concat(
       typeof SGK_RECEITAS_EXTRAS !== "undefined" ? SGK_RECEITAS_EXTRAS : [],
@@ -44,9 +43,12 @@ const App = {
       }
     });
 
-    // Atualiza as receitas-modelo quando o conteúdo didático muda de versão
+    // Atualiza o catálogo base SEM apagar receitas cadastradas pelas tias.
+    // Só sai do sistema o que a pessoa removeu explicitamente.
     if (localStorage.getItem("sgk2_receitas_versao") !== SGK_RECEITAS_VERSAO) {
-      this.state.receitas = JSON.parse(JSON.stringify(receitasBase));
+      const bases = new Set(receitasBase.map(r => r.id));
+      const cadastradas = (this.state.receitas || []).filter(r => !bases.has(r.id));
+      this.state.receitas = JSON.parse(JSON.stringify(receitasBase)).concat(cadastradas);
       localStorage.setItem("sgk2_receitas", JSON.stringify(this.state.receitas));
       localStorage.setItem("sgk2_receitas_versao", SGK_RECEITAS_VERSAO);
     }
@@ -234,6 +236,42 @@ const App = {
     if (chave === "estoque") this.registrarVencidosComoDesperdicio();
   },
 
+  /* ---------- Histórico de alterações ---------- */
+  registrarAtividade(acao, detalhe) {
+    const regs = this.state.atividades || (this.state.atividades = []);
+    regs.push({
+      id: this.uid(),
+      nome: this.usuario?.nome || "Cozinheira",
+      perfil: this.role,
+      acao,
+      detalhe: detalhe || "",
+      data: this.hojeISO(),
+      hora: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+    });
+    if (regs.length > 300) regs.splice(0, regs.length - 300);
+    this.salvar("atividades");
+  },
+
+  abrirHistorico() {
+    const regs = [...(this.state.atividades || [])].reverse();
+    this.abrirModal("📝 Histórico de alterações", regs.length ? `
+      <p class="hint">Cada alteração registra quem fez, o que foi feito e quando. O histórico fica salvo neste navegador.</p>
+      <div class="historico-lista">
+        ${regs.map(a => `<div class="historico-item">
+          <div class="hi-ico">✏️</div>
+          <div class="hi-info">
+            <strong>${this.esc(a.nome)}</strong> <span class="hi-acao">${this.esc(a.acao)}</span>
+            <p>${this.esc(a.detalhe)}</p>
+            <small>📅 ${this.fmtData(a.data)} · 🕒 ${this.esc(a.hora)} · ${this.esc(a.perfil)}</small>
+          </div>
+        </div>`).join("")}
+      </div>
+    ` : `<div class="empty-state"><span class="es-ico">📝</span>
+        <h3>Nenhuma alteração registrada</h3>
+        <p>Quando alguém cadastrar, editar ou remover algo, aparecerá aqui.</p></div>`,
+      `<button class="btn btn-outline" data-fechar-modal>Fechar</button>`);
+  },
+
   hojeISO() {
     const d = new Date();
     return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -391,7 +429,6 @@ const App = {
       el.classList.toggle("zero", !v);
     };
     set("badgeReceitas", this.state.receitas.filter((r) => r.status === "aprovada").length);
-    set("badgeVideos", (this.state.videos || []).length);
     set("badgeEstoque", criticos);
     set("badgeAvisos", naoLidos);
     set("badgeAprovacoes", pendentes);
@@ -434,6 +471,18 @@ const App = {
           <p>${ultimo.itens} de ${ultimo.total} itens de higiene confirmados pela cozinha.</p>
           <small>📅 ${this.fmtData(ultimo.data)}${ultimo.hora ? " · 🕒 " + this.esc(ultimo.hora) : ""}</small></div>
         </div>` : `<div class="empty-state" style="padding:20px">Nenhum checklist concluído pela cozinha ainda.</div>`;
+    }
+
+    // Histórico: quem alterou o quê e quando
+    const ha = document.getElementById("homeAtividade");
+    if (ha) {
+      const atvs = [...(this.state.atividades || [])].reverse().slice(0, 5);
+      ha.innerHTML = atvs.length ? atvs.map(a => `<div class="mini-item">
+          <span class="mini-ico">✏️</span>
+          <div><strong>${this.esc(a.nome)}</strong> <span class="ativa-acao">${this.esc(a.acao)}</span>
+          <p>${this.esc(a.detalhe)}</p><small>📅 ${this.fmtData(a.data)} · 🕒 ${this.esc(a.hora)}</small></div>
+        </div>`).join("")
+        : `<div class="empty-state" style="padding:20px">Nenhuma alteração feita ainda.</div>`;
     }
 
     const hoje = new Date();
@@ -545,6 +594,7 @@ const App = {
       else this.state.cardapio.push(dados);
       this.diaCardapio = editando ? indice : this.state.cardapio.length - 1;
       this.salvar("cardapio");
+      this.registrarAtividade(editando ? "editou o cardápio" : "montou o cardápio", dados.dia);
       this.fecharModal();
       this.toast(editando ? "Dia atualizado no cardápio!" : "Dia adicionado ao cardápio!");
       this.renderCardapio();
@@ -626,7 +676,7 @@ const App = {
         : "");
   },
 
-  /* ---------- Vídeos ---------- */
+  /* ---------- Vídeos das receitas ---------- */
   videoPorId(id) {
     return (this.state.videos || []).find(v => v.id === id) || null;
   },
@@ -635,63 +685,6 @@ const App = {
     return (r.videos || []).map(id => this.videoPorId(id) || {
       id, titulo: "Vídeo da receita", canal: "YouTube", tipo: "Vídeo aula",
     });
-  },
-
-  videoCard(v) {
-    const thumb = `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`;
-    return `<article class="video-card">
-      <a class="video-thumb" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener" title="Assistir no YouTube">
-        <img src="${thumb}" alt="Capa do vídeo: ${this.esc(v.titulo)}" loading="lazy" />
-        <span class="video-play">▶</span>
-        <span class="video-tipo">${this.esc(v.tipo)}</span>
-      </a>
-      <div class="video-body">
-        <span class="video-cat">${this.esc(v.categoria)}</span>
-        <h4>${this.esc(v.titulo)}</h4>
-        <p>${this.esc(v.descricao || "")}</p>
-        <div class="video-meta">
-          <span>📺 ${this.esc(v.canal)}</span>
-          ${v.duracao ? `<span>⏱️ ${this.esc(v.duracao)}</span>` : ""}
-        </div>
-      </div>
-      <a class="video-link" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Assistir no YouTube ↗</a>
-    </article>`;
-  },
-
-  renderVideos() {
-    const busca = (document.getElementById("buscaVideo")?.value || "").toLowerCase().trim();
-    let lista = [...(this.state.videos || [])];
-    if (this.filtroVideo !== "Todas") lista = lista.filter(v => v.categoria === this.filtroVideo);
-    if (busca) {
-      lista = lista.filter(v =>
-        (v.titulo + " " + v.canal + " " + v.categoria + " " + (v.descricao || "") + " " + v.tipo).toLowerCase().includes(busca)
-      );
-    }
-
-    const grid = document.getElementById("videosGrid");
-    if (!grid) return;
-    if (!lista.length) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-        <span class="es-ico">🎥</span><h3>Nenhum vídeo encontrado</h3>
-        <p>Tente outro tema ou limpe a busca.</p></div>`;
-      return;
-    }
-
-    const grupos = {};
-    lista.forEach(v => {
-      (grupos[v.categoria] = grupos[v.categoria] || []).push(v);
-    });
-
-    grid.innerHTML = Object.keys(grupos).map(cat => `
-      <div class="videos-grupo">
-        <div class="videos-grupo-head">
-          <h3>${this.esc(cat)}</h3>
-          <span>${grupos[cat].length} vídeo(s)</span>
-        </div>
-        <div class="videos-lista">
-          ${grupos[cat].map(v => this.videoCard(v)).join("")}
-        </div>
-      </div>`).join("");
   },
 
   verReceita(id) {
@@ -786,7 +779,7 @@ const App = {
       const videoId = (linkVideo.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{11})/) || [])[1] || "";
 
       const r = {
-        id: this.uid(), nome, emoji: "🍽️",
+        id: this.uid(), nome, emoji: "🍽️", origem: "usuario",
         categoria: document.getElementById("f_cat").value,
         tempo: document.getElementById("f_tempo").value.trim() || "—",
         porcao: document.getElementById("f_porcao").value.trim(),
@@ -801,6 +794,7 @@ const App = {
       };
       this.state.receitas.push(r);
       this.salvar("receitas");
+      this.registrarAtividade(this.role === "diretora" ? "publicou a receita" : "cadastrou a receita", nome);
       this.fecharModal();
       this.toast(this.role === "diretora" ? "Receita publicada!" : "Receita enviada para aprovação da direção!");
       this.renderizar();
@@ -957,8 +951,9 @@ const App = {
         validade: document.getElementById("e_val").value,
       };
       if (item) Object.assign(item, dados);
-      else this.state.estoque.push({ id: this.uid(), ...dados });
+      else this.state.estoque.push({ id: this.uid(), origem: "usuario", ...dados });
       this.salvar("estoque");
+      this.registrarAtividade(item ? "editou o alimento" : "cadastrou o alimento", nome);
       this.fecharModal();
       this.toast(item ? "Item atualizado!" : "Item adicionado ao estoque!");
       this.renderEstoque();
@@ -1024,6 +1019,7 @@ const App = {
       regs.push({ id: this.uid(), data: hoje, hora, nome, perfil: this.role, itens: 8, total: 8 });
     }
     this.salvar("checklistRegistros");
+    this.registrarAtividade("concluiu o checklist de higiene", "8 de 8 itens confirmados");
     this.renderChecklistRegistros();
     this.toast("Checklist concluído! Registro enviado para pedagogas e diretoras ✅");
   },
@@ -1094,6 +1090,7 @@ const App = {
         autor: "Diretoria Pedagógica", data: this.hojeISO(), lido: false,
       });
       this.salvar("avisos");
+      this.registrarAtividade("publicou um aviso", titulo);
       this.fecharModal();
       this.toast("Aviso publicado para a equipe!");
       this.renderAvisos();
@@ -1287,6 +1284,7 @@ const App = {
         valor: Number(document.getElementById("d_valor").value) || 0,
       });
       this.salvar("desperdicio");
+      this.registrarAtividade("registrou desperdício", `${item} · ${document.getElementById("d_motivo").value}`);
       this.fecharModal();
       this.toast("Desperdício registrado. O relatório foi atualizado!");
       this.renderRelatorio();
@@ -1501,6 +1499,7 @@ const App = {
     document.getElementById("btnNotificacoes").onclick = () => this.irPara("avisos");
     document.getElementById("btnImprimirCardapio").onclick = () => window.print();
     document.getElementById("btnMontarCardapio").onclick = () => this.formCardapio();
+    document.getElementById("btnHistorico").onclick = () => this.abrirHistorico();
     document.getElementById("semanaTabs").addEventListener("click", (e) => {
       const b = e.target.closest("[data-dia]");
       if (b) { this.diaCardapio = Number(b.dataset.dia); this.renderCardapio(); }
@@ -1559,6 +1558,7 @@ const App = {
           this.state.cardapio.splice(idx, 1);
           this.diaCardapio = 0;
           this.salvar("cardapio");
+          this.registrarAtividade("removeu o dia do cardápio", d.dia);
           this.toast("Dia removido do cardápio.", "info");
           this.renderCardapio();
         }
@@ -1570,7 +1570,8 @@ const App = {
         const r = this.state.receitas.find(x => x.id === dr.dataset.delReceita);
         if (r && confirm(`Remover a receita "${r.nome}"?`)) {
           this.state.receitas = this.state.receitas.filter(x => x.id !== r.id);
-          this.salvar("receitas"); this.toast("Receita removida.", "info"); this.renderizar();
+          this.salvar("receitas"); this.registrarAtividade("removeu a receita", r.nome);
+          this.toast("Receita removida.", "info"); this.renderizar();
         }
       }
       const da = e.target.closest("[data-del-aviso]");
@@ -1578,7 +1579,8 @@ const App = {
         const a = this.state.avisos.find(x => x.id === da.dataset.delAviso);
         if (a && confirm(`Remover o aviso "${a.titulo}"?`)) {
           this.state.avisos = this.state.avisos.filter(x => x.id !== a.id);
-          this.salvar("avisos"); this.toast("Aviso removido.", "info"); this.renderAvisos(); this.atualizarBadges();
+          this.salvar("avisos"); this.registrarAtividade("removeu o aviso", a.titulo);
+        this.toast("Aviso removido.", "info"); this.renderAvisos(); this.atualizarBadges();
         }
       }
       const dd = e.target.closest("[data-del-desperdicio]");
@@ -1586,7 +1588,8 @@ const App = {
         const d = this.state.desperdicio.find(x => x.id === dd.dataset.delDesperdicio);
         if (d && confirm(`Remover o registro de desperdício de "${d.item}"?`)) {
           this.state.desperdicio = this.state.desperdicio.filter(x => x.id !== d.id);
-          this.salvar("desperdicio"); this.toast("Registro removido.", "info"); this.renderRelatorio();
+          this.salvar("desperdicio"); this.registrarAtividade("removeu o registro de desperdício", d.item);
+        this.toast("Registro removido.", "info"); this.renderRelatorio();
         }
       }
 
@@ -1595,14 +1598,15 @@ const App = {
       const apr = e.target.closest("[data-aprovar]");
       if (apr) {
         const r = this.state.receitas.find(x => x.id === apr.dataset.aprovar);
-        if (r) { r.status = "aprovada"; this.salvar("receitas"); this.toast(`Receita "${r.nome}" aprovada!`); this.renderizar(); }
+        if (r) { r.status = "aprovada"; this.salvar("receitas"); this.registrarAtividade("aprovou a receita", r.nome); this.toast(`Receita "${r.nome}" aprovada!`); this.renderizar(); }
       }
       const rej = e.target.closest("[data-rejeitar]");
       if (rej) {
         const r = this.state.receitas.find(x => x.id === rej.dataset.rejeitar);
         if (r && confirm(`Rejeitar a receita "${r.nome}"? Ela será removida.`)) {
           this.state.receitas = this.state.receitas.filter(x => x.id !== r.id);
-          this.salvar("receitas"); this.toast("Receita rejeitada e removida.", "info"); this.renderizar();
+          this.salvar("receitas"); this.registrarAtividade("rejeitou a receita", r.nome);
+          this.toast("Receita rejeitada e removida.", "info"); this.renderizar();
         }
       }
     });
@@ -1619,7 +1623,8 @@ const App = {
           const q = prompt(`Quanto deseja adicionar ao item "${i.item}"? (em ${i.unidade})`, "10");
           if (q !== null && !isNaN(Number(q)) && Number(q) > 0) {
             i.qtd = Number(i.qtd) + Number(q);
-            this.salvar("estoque"); this.toast("Estoque atualizado!"); this.renderEstoque(); this.atualizarBadges();
+            this.salvar("estoque"); this.registrarAtividade("ajustou a quantidade no estoque", `${i.item} (+${q} ${i.unidade})`);
+            this.toast("Estoque atualizado!"); this.renderEstoque(); this.atualizarBadges();
           }
         }
       }
@@ -1628,7 +1633,8 @@ const App = {
         const i = this.state.estoque.find(x => x.id === del.dataset.delEstoque);
         if (i && confirm(`Excluir "${i.item}" do estoque?`)) {
           this.state.estoque = this.state.estoque.filter(x => x.id !== i.id);
-          this.salvar("estoque"); this.toast("Item removido.", "info"); this.renderEstoque(); this.atualizarBadges();
+          this.salvar("estoque"); this.registrarAtividade("removeu o alimento do estoque", i.item);
+          this.toast("Item removido.", "info"); this.renderEstoque(); this.atualizarBadges();
         }
       }
     });

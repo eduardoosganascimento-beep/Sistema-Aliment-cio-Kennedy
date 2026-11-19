@@ -1,69 +1,82 @@
-# 🍽️ Sistema-Aliment-cio-Kennedy
+# 🍽️ SGK — Sistema Gerenciador Culinário Kennedy
 
-## 🚀 Acessar o sistema (clique para abrir)
+Sistema de gestão da cozinha escolar: receitas passo a passo, cardápio semanal,
+controle de estoque com quantidade e preço, higiene, avisos, aprovação de
+receitas, relatório de desperdício e histórico de alterações.
 
-# [👉 ABRIR O SITE SGK 👈](https://sgk-kennedy.onrender.com)
-
-> **SGK — Sistema Gerenciador Culinário Kennedy**
-> Sistema de gestão da cozinha escolar: receitas passo a passo, cardápio semanal,
-> controle de estoque com quantidade e preço, higiene, avisos, aprovação de
-> receitas e relatório mensal de desperdício.
+[**👉 ABRIR O SITE SGK 👈**](https://sgk-kennedy.onrender.com)
 
 [![Deploy no Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/eduardoosganascimento-beep/Sistema-Aliment-cio-Kennedy)
 
 ---
 
-## 🆕 Novidades da versão atual
+## 📑 Índice
 
-- 🎨 **Visual preto e azul** (tema “Obsidian Blue”): cartões refinados, brilhos suaves e tipografia mais marcante, com tema claro opcional
-- 📱 **Navegação inferior no celular** com acesso rápido a Início, Cardápio, Receitas e Estoque
-- 🔐 **Login com escolha de perfil** em cartões (Cozinheira, Pedagoga ou Diretora)
-- 🔑 **Sessão mantida ao recarregar** a página (não pede login de novo)
-- 👁️ **Mostrar/ocultar senha** e botões para preencher as contas de demonstração
-- 🧹 **Contas de teste limpas automaticamente**: contas criadas em sessões anteriores são removidas, mantendo apenas as oficiais
-- 🍽️ **Mais de 1.000 receitas escolares** em 10 porções, organizadas por categoria (incluindo nuggets, carne moída, frango, carnes, bolos salgados, sobremesas e salgados)
-- 🥚🐟 **Receitas de ovos e peixes**: 6 receitas de ovos e 6 de peixes em categorias próprias, com filtros dedicados, vídeos de segurança e dicas de higiene
-- 📚 **Catálogo mais organizado**: categorias em ordem fixa com ícones e receitas em ordem alfabética dentro de cada grupo
-- 🚫 **Validade vencida conta como desperdício**: itens vencidos no estoque viram registro automático no relatório (quantidade × preço), sem duplicatas
-- ⏱️ **Receitas mais enxutas**: mostram só o tempo de preparo (não exibem mais "serve quantas pessoas") e têm o texto explicativo centralizado
-- 🎥 **Vídeos dentro de cada receita**: a seção separada "Vídeos que ensinam" saiu do menu — os links ficam no modal de cada receita
-- 📅 **Cardápio montado pelas tias**: elas adicionam, editam e removem os dias da semana
-- ✅ **Comprovante do checklist**: ao concluir o checklist diário de higiene, a tia gera um registro com nome, data e hora que aparece para pedagogas e diretoras
+- [Perfis de acesso](#-perfis-de-acesso)
+- [Funcionalidades](#-funcionalidades)
+- [Histórico de alterações](#-histórico-de-alterações)
+- [Acesso de teste](#-acesso-de-teste)
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Rodar localmente](#-rodar-localmente)
+- [Publicação](#-publicação)
+
+---
+
+## 👥 Perfis de acesso
+
+| Perfil | Responsabilidades |
+| --- | --- |
+| 👩‍🍳 **Cozinheira (tia)** | Monta o cardápio, faz o checklist diário de higiene, cadastra alimentos e envia receitas para aprovação |
+| 📚 **Pedagoga** | Consulta receitas/cardápio/higiene, cadastra alimentos e acompanha os comprovantes da cozinha |
+| 🎓 **Diretora Pedagoga** | Publica avisos, aprova receitas, acompanha o relatório de desperdício e vê os comprovantes |
+
+> ⚠️ Os dados ficam no `localStorage` do navegador. Não há servidor nem banco de
+> dados: o comprovante de higiene e o histórico aparecem no **mesmo
+> navegador/dispositivo** usado pela tia.
 
 ---
 
 ## ✨ Funcionalidades
 
-### Para a cozinheira
-- 📖 **Mais de 1.000 receitas passo a passo** (10 porções): nuggets, carne moída, frango, carnes, **ovos, peixes**, massas, sopas, saladas, sucos, bolos salgados, bolos e salgados em geral
-- 🎥 **Vídeos que ensinam dentro das receitas**: links do YouTube no modal de cada receita (não há mais menu separado de vídeos)
-- 🍽️ **Porcionamento simples** e organização das receitas por categoria
-- 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa) — **montado pelas tias**, que adicionam, editam e removem os dias
-- ✅ **Checklist diário de higiene**: ao concluir todas as 8 rotinas, o sistema registra automaticamente quem concluiu, a data e a hora
-- 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (Cozinheira, Pedagoga e Diretora)
-- 🗑️ **Remoção de qualquer item cadastrado** (alimentos, receitas, avisos e registros)
-- ⚠️ **Alertas** de estoque baixo e alimentos vencidos
-- 🧼 **Higiene e boas práticas** com checklist diário
-- 📂 **Organização por categoria** (Grãos, Mercearia, Hortifruti, Proteínas, etc.)
-- 🔍 **Busca em todo o sistema** e buscas por seção
-- ⚫🔵 **Visual preto e azul**, com opção de tema claro
+### Receitas
+- 📖 Mais de 1.000 receitas escolares para ~10 porções, em categorias com ícones e ordem fixa
+- 🥚🐟 Categorias próprias de **ovos** e **peixes** (6 receitas cada), com vídeos de segurança e dicas de higiene
+- ⏱️ Cartões mostram apenas o tempo de preparo, com texto explicativo centralizado
+- 🎥 Vídeos do YouTube dentro de cada receita (a seção separada saiu do menu)
+- 🔍 Busca por nome, descrição e ingredientes; filtros por categoria
+- ➕ Receitas cadastradas ficam salvas e **só são removidas se a pessoa excluir**
 
-### Para a pedagoga
-- 📦 **Cadastro de alimentos** com quantidade, preço, validade e quantidade mínima
-- 📖 Consulta de receitas, cardápio e higiene
-- ✅ **Acompanha o comprovante do checklist de higiene** feito pelas tias (nome, data e hora), na tela inicial e em Higiene
+### Cardápio e cozinha
+- 📅 Cardápio semanal montado pelas **tias** (adicionar, editar e remover dias)
+- 🧼 Checklist diário de higiene: ao concluir as 8 rotinas, gera comprovante com nome, data e hora para pedagogas e diretoras
+- 📦 Estoque com quantidade, preço unitário, validade e quantidade mínima
+- 🚫 Itens com validade vencida entram **automaticamente** no relatório como desperdício (quantidade × preço, sem duplicatas)
+- ⚠️ Alertas de estoque baixo e alimentos vencidos
 
-### Para a diretora pedagoga
-- 🔔 **Avisos** para a equipe
-- ✅ **Aprovação de receitas** enviadas pelas cozinheiras
-- 📊 **Relatório mensal de desperdício** com gráficos, prejuízo estimado e sugestões — itens com validade vencida entram automaticamente
-- 🧾 **Exportação CSV** do relatório
-- 👥 Também pode **cadastrar alimentos** com quantidade e preço
-- ✅ **Vê o comprovante do checklist de higiene** concluído pelas tias
+### Gestão
+- 🔔 Avisos da direção para a equipe
+- ✅ Aprovação de receitas enviadas pelas cozinheiras
+- 📊 Relatório mensal de desperdício com gráficos, prejuízo estimado, sugestões e exportação CSV
+- 🎨 Tema preto e azul (Obsidian Blue), com opção de tema claro
+- 📱 Navegação inferior no celular e interface responsiva
 
-No login, a pessoa escolhe seu perfil: **Cozinheira**, **Pedagoga** ou **Diretora Pedagoga**.
-As **tias (cozinheiras)** montam o cardápio e fazem o checklist diário de higiene; pedagogas e diretoras acompanham os comprovantes.
-Os dados são salvos no navegador (`localStorage`), então funcionam sem servidor ou banco de dados. Por isso o comprovante aparece no mesmo navegador/dispositivo usado pela tia.
+---
+
+## 📝 Histórico de alterações
+
+Toda alteração registra **quem fez, o que foi feito e quando**:
+
+- Cadastro/edição/remoção de receitas, alimentos e dias do cardápio
+- Aprovação e rejeição de receitas
+- Ajuste de quantidade no estoque e remoção de itens
+- Conclusão do checklist de higiene
+- Publicação/remoção de avisos e registro/remoção de desperdício
+
+O painel **"Atividade recente"** aparece na tela inicial e o botão
+**"Ver histórico completo"** abre a lista completa. Nada é apagado
+automaticamente: apenas a exclusão explícita remove um item cadastrado.
+
+---
 
 ## 🔐 Acesso de teste
 
@@ -73,32 +86,32 @@ Os dados são salvos no navegador (`localStorage`), então funcionam sem servido
 | 📚 Pedagoga | `pedagoga@kennedy.escola.br` | `kennedy123` |
 | 🎓 Diretora Pedagoga | `diretora@kennedy.escola.br` | `kennedy123` |
 
-> Contas criadas em sessões anteriores são removidas automaticamente ao abrir o
-> sistema atualizado. Use uma das contas oficiais acima para entrar.
-
 Também é possível criar novas contas na aba **Criar conta** da tela de login.
 
-## 📁 Estrutura
+---
+
+## 📁 Estrutura do projeto
 
 ```
 Sistema-Aliment-cio-Kennedy/
 ├── sgk-kennedy/
-│   ├── index.html          # Estrutura do sistema
-│   ├── 404.html            # Página de erro personalizada
-│   ├── favicon.svg         # Ícone da aba do navegador
-│   ├── robots.txt          # Regras para robôs de busca
-│   ├── sitemap.xml         # Mapa do site
-│   ├── css/styles.css      # Tema preto e azul + responsivo
+│   ├── index.html                  # Estrutura e seções do sistema
+│   ├── 404.html                    # Página de erro personalizada
+│   ├── favicon.svg                 # Ícone da aba
+│   ├── robots.txt / sitemap.xml    # Regras e mapa para buscadores
+│   ├── css/styles.css              # Tema, componentes e responsividade
 │   └── js/
-│       ├── data.js            # Dados iniciais (cardápio, receitas base, estoque, etc.)
-│       ├── receitas-extras.js # Catálogo ampliado com mais de 1.000 receitas escolares
-│       ├── receitas-ovos-peixes.js # Receitas de ovos e peixes (categorias próprias)
-│       ├── videos-data.js     # Catálogo de vídeos do YouTube por tema
-│       └── app.js          # Lógica, contas, sessão e interações
-├── render.yaml             # Blueprint de deploy no Render
+│       ├── data.js                 # Dados iniciais (cardápio, receitas base etc.)
+│       ├── receitas-extras.js      # Catálogo ampliado (1.000+ receitas)
+│       ├── receitas-ovos-peixes.js # Receitas de ovos e peixes
+│       ├── videos-data.js          # Vídeos usados dentro das receitas
+│       └── app.js                  # Lógica, perfis, sessão e interações
+├── render.yaml                     # Blueprint de deploy no Render
 ├── .gitignore
 └── README.md
 ```
+
+---
 
 ## 💻 Rodar localmente
 
@@ -110,8 +123,15 @@ python -m http.server 8000
 # acesse http://localhost:8000
 ```
 
+---
+
 ## 🌐 Publicação
 
-O site está publicado no **Render** como site estático gratuito. O arquivo
-`render.yaml` permite recriar o serviço em um clique pelo botão **Deploy no Render**
-acima. Alterações na branch `main` são publicadas automaticamente.
+O site está no **Render** como site estático gratuito:
+https://sgk-kennedy.onrender.com
+
+O arquivo `render.yaml` permite recriar o serviço pelo botão **Deploy no Render**.
+O serviço está configurado com Auto-Deploy "On Commit", mas historicamente os
+deploys foram feitos de forma manual pelo painel do Render
+(`Manual Deploy → Deploy latest commit`). Se uma alteração não aparecer no ar,
+verifique o último deploy no painel e dispare um novo.

@@ -854,6 +854,18 @@ body.claro .receitas-grupo-head h3 { color: var(--text); }
 .registro-check .rc-selo { font-size: 9.5px; font-weight: 900; letter-spacing: .6px; color: #86efac; border: 1px solid rgba(134,239,172,.35); background: rgba(34,197,94,.12); border-radius: 20px; padding: 5px 10px; white-space: nowrap; }
 body.claro .registro-check .rc-info strong { color: #0f172a; }
 
+/* Histórico de alterações */
+.ativa-acao { font-size: 11.5px; color: #93c5fd; font-weight: 600; }
+.historico-lista { display: flex; flex-direction: column; gap: 8px; }
+.historico-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border-soft); border-radius: 10px; background: rgba(59,130,246,.05); }
+.historico-item .hi-ico { font-size: 16px; }
+.historico-item .hi-info { flex: 1; }
+.historico-item .hi-info strong { font-size: 12.5px; color: #fff; }
+.historico-item .hi-acao { font-size: 12px; color: #93c5fd; }
+.historico-item .hi-info p { font-size: 11.5px; color: var(--muted); margin: 2px 0; }
+.historico-item .hi-info small { font-size: 10px; color: var(--muted-2); }
+body.claro .historico-item .hi-info strong { color: #0f172a; }
+
 /* ============================================================
    Avisos / Aprovações
    ============================================================ */
