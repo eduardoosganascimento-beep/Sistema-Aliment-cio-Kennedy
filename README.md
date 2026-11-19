@@ -24,6 +24,7 @@
 - 🍽️ **Mais de 1.000 receitas escolares** em 10 porções, organizadas por categoria (incluindo nuggets, carne moída, frango, carnes, bolos salgados, sobremesas e salgados)
 - 🥚🐟 **Receitas de ovos e peixes**: 6 receitas de ovos e 6 de peixes em categorias próprias, com filtros dedicados, vídeos de segurança e dicas de higiene
 - 📚 **Catálogo mais organizado**: categorias em ordem fixa com ícones e receitas em ordem alfabética dentro de cada grupo
+- 🚫 **Validade vencida conta como desperdício**: itens vencidos no estoque viram registro automático no relatório (quantidade × preço), sem duplicatas
 - ⏱️ **Receitas mais enxutas**: mostram só o tempo de preparo (não exibem mais "serve quantas pessoas") e têm o texto explicativo centralizado
 - 🎥 **Vídeos dentro de cada receita**: a seção separada "Vídeos que ensinam" saiu do menu — os links ficam no modal de cada receita
 - 📅 **Cardápio montado pelas tias**: elas adicionam, editam e removem os dias da semana
@@ -55,7 +56,7 @@
 ### Para a diretora pedagoga
 - 🔔 **Avisos** para a equipe
 - ✅ **Aprovação de receitas** enviadas pelas cozinheiras
-- 📊 **Relatório mensal de desperdício** com gráficos, prejuízo estimado e sugestões
+- 📊 **Relatório mensal de desperdício** com gráficos, prejuízo estimado e sugestões — itens com validade vencida entram automaticamente
 - 🧾 **Exportação CSV** do relatório
 - 👥 Também pode **cadastrar alimentos** com quantidade e preço
 - ✅ **Vê o comprovante do checklist de higiene** concluído pelas tias

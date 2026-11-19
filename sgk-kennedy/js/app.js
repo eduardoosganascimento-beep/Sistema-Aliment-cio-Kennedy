@@ -57,6 +57,8 @@ const App = {
     this.role = localStorage.getItem("sgk2_role") || "tia";
     this.checklist = JSON.parse(localStorage.getItem("sgk2_checklist") || "[]");
     this.carregarContas();
+    // Itens com validade vencida passam a contar como desperdício automaticamente
+    this.registrarVencidosComoDesperdicio();
   },
 
   carregarContas() {
@@ -228,6 +230,8 @@ const App = {
 
   salvar(chave) {
     localStorage.setItem("sgk2_" + chave, JSON.stringify(this.state[chave]));
+    // Sempre que o estoque muda, itens vencidos viram registro de desperdício
+    if (chave === "estoque") this.registrarVencidosComoDesperdicio();
   },
 
   hojeISO() {
@@ -847,7 +851,7 @@ const App = {
         ["📦", "bg-blue", "Total de itens", this.state.estoque.length, "alimentos cadastrados"],
         ["✅", "bg-green", "Em ordem", this.state.estoque.length - criticos.length, "sem alertas"],
         ["⚠️", "bg-orange", "Estoque baixo", baixos.length, "precisam de reposição"],
-        ["🚫", "bg-red", "Vencidos", vencidos.length, "devem ser descartados"],
+        ["🚫", "bg-red", "Vencidos", vencidos.length, "contabilizados como desperdício"],
         ["💰", "bg-purple", "Valor do estoque", this.fmtMoeda(valorTotal), " quantidade × preço"],
       ].map(s => `<div class="stat-card"><div class="stat-icon ${s[1]}">${s[0]}</div>
         <div class="stat-info"><span>${s[2]}</span><strong style="font-size:${typeof s[3] === "number" ? "22px" : "18px"}">${s[3]}</strong><small>${s[4]}</small></div></div>`).join("")}`;
@@ -869,7 +873,7 @@ const App = {
             return `<div class="alerta-item ${v ? "" : "atencao"}">
               <span class="ai-ico">${v ? "🚫" : "⚠️"}</span>
               <span><strong>${this.esc(i.item)}</strong> — ${v
-                ? `validade vencida em ${this.fmtData(i.validade)}`
+                ? `validade vencida em ${this.fmtData(i.validade)} — contabilizado como desperdício`
                 : `restam apenas ${i.qtd} ${this.esc(i.unidade)} (mínimo ${i.minimo})`}</span>
             </div>`;
           }).join("") + (criticos.length > 4 ? `<p class="hint">+ ${criticos.length - 4} item(ns) na tabela abaixo.</p>` : "")
@@ -1126,6 +1130,35 @@ const App = {
   },
 
   /* ---------- Relatório ---------- */
+  // Todo item com validade vencida é contabilizado como desperdício.
+  // O registro é criado uma única vez por item/validade/quantidade.
+  registrarVencidosComoDesperdicio() {
+    const hoje = this.hojeISO();
+    const regs = this.state.desperdicio || (this.state.desperdicio = []);
+    let novos = 0;
+    (this.state.estoque || []).forEach(i => {
+      if (!i.validade || i.validade >= hoje) return;
+      const qtd = Number(i.qtd) || 0;
+      const jaRegistrado = regs.some(d =>
+        d.origemItemId === i.id && d.validadeItem === i.validade && Number(d.qtd) === qtd
+      );
+      if (jaRegistrado) return;
+      regs.push({
+        id: this.uid(),
+        item: i.item,
+        data: hoje,
+        qtd,
+        unidade: i.unidade,
+        motivo: "Validade vencida",
+        valor: qtd * Number(i.preco || 0),
+        origemItemId: i.id,
+        validadeItem: i.validade,
+      });
+      novos++;
+    });
+    if (novos) this.salvar("desperdicio");
+  },
+
   valorDesperdicioMes() {
     const hoje = new Date();
     return this.state.desperdicio
@@ -1147,7 +1180,7 @@ const App = {
   renderRelatorio() {
     const hoje = new Date();
     document.getElementById("relatorioSubtitulo").textContent =
-      `Acompanhamento de ${hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}.`;
+      `Acompanhamento de ${hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}. Itens com validade vencida entram automaticamente como desperdício.`;
     const lista = this.desperdicioDoMes();
     const total = this.valorDesperdicioMes();
 
