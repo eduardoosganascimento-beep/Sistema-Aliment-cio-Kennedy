@@ -22,16 +22,23 @@
 - 👁️ **Mostrar/ocultar senha** e botões para preencher as contas de demonstração
 - 🧹 **Contas de teste limpas automaticamente**: contas criadas em sessões anteriores são removidas, mantendo apenas as oficiais
 - 🍽️ **Mais de 1.000 receitas escolares** em 10 porções, organizadas por categoria (incluindo nuggets, carne moída, frango, carnes, bolos salgados, sobremesas e salgados)
+- 🥚🐟 **Receitas de ovos e peixes**: 6 receitas de ovos e 6 de peixes em categorias próprias, com filtros dedicados, vídeos de segurança e dicas de higiene
+- 📚 **Catálogo mais organizado**: categorias em ordem fixa com ícones e receitas em ordem alfabética dentro de cada grupo
+- ⏱️ **Receitas mais enxutas**: mostram só o tempo de preparo (não exibem mais "serve quantas pessoas") e têm o texto explicativo centralizado
+- 🎥 **Vídeos dentro de cada receita**: a seção separada "Vídeos que ensinam" saiu do menu — os links ficam no modal de cada receita
+- 📅 **Cardápio montado pelas tias**: elas adicionam, editam e removem os dias da semana
+- ✅ **Comprovante do checklist**: ao concluir o checklist diário de higiene, a tia gera um registro com nome, data e hora que aparece para pedagogas e diretoras
 
 ---
 
 ## ✨ Funcionalidades
 
 ### Para a cozinheira
-- 📖 **Mais de 1.000 receitas passo a passo** (10 porções): nuggets, carne moída, frango, carnes, peixes, massas, sopas, saladas, sucos, bolos salgados, bolos e salgados em geral
-- 🎥 **Vídeos que ensinam**: links do YouTube organizados por tema (como fazer, macetes, quantidades e segurança)
+- 📖 **Mais de 1.000 receitas passo a passo** (10 porções): nuggets, carne moída, frango, carnes, **ovos, peixes**, massas, sopas, saladas, sucos, bolos salgados, bolos e salgados em geral
+- 🎥 **Vídeos que ensinam dentro das receitas**: links do YouTube no modal de cada receita (não há mais menu separado de vídeos)
 - 🍽️ **Porcionamento simples** e organização das receitas por categoria
-- 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa)
+- 📅 **Cardápio semanal** completo (café, almoço, lanche e sobremesa) — **montado pelas tias**, que adicionam, editam e removem os dias
+- ✅ **Checklist diário de higiene**: ao concluir todas as 8 rotinas, o sistema registra automaticamente quem concluiu, a data e a hora
 - 📦 **Cadastro de alimentos**: quantidade, preço unitário, validade e quantidade mínima (Cozinheira, Pedagoga e Diretora)
 - 🗑️ **Remoção de qualquer item cadastrado** (alimentos, receitas, avisos e registros)
 - ⚠️ **Alertas** de estoque baixo e alimentos vencidos
@@ -42,7 +49,8 @@
 
 ### Para a pedagoga
 - 📦 **Cadastro de alimentos** com quantidade, preço, validade e quantidade mínima
-- 📖 Consulta de receitas, cardápio, higiene e vídeos
+- 📖 Consulta de receitas, cardápio e higiene
+- ✅ **Acompanha o comprovante do checklist de higiene** feito pelas tias (nome, data e hora), na tela inicial e em Higiene
 
 ### Para a diretora pedagoga
 - 🔔 **Avisos** para a equipe
@@ -50,10 +58,11 @@
 - 📊 **Relatório mensal de desperdício** com gráficos, prejuízo estimado e sugestões
 - 🧾 **Exportação CSV** do relatório
 - 👥 Também pode **cadastrar alimentos** com quantidade e preço
+- ✅ **Vê o comprovante do checklist de higiene** concluído pelas tias
 
 No login, a pessoa escolhe seu perfil: **Cozinheira**, **Pedagoga** ou **Diretora Pedagoga**.
-A cozinheira monta o cardápio; a pedagoga e a diretora também podem cadastrar alimentos.
-Os dados são salvos no navegador (`localStorage`), então funcionam sem servidor ou banco de dados.
+As **tias (cozinheiras)** montam o cardápio e fazem o checklist diário de higiene; pedagogas e diretoras acompanham os comprovantes.
+Os dados são salvos no navegador (`localStorage`), então funcionam sem servidor ou banco de dados. Por isso o comprovante aparece no mesmo navegador/dispositivo usado pela tia.
 
 ## 🔐 Acesso de teste
 
@@ -82,6 +91,7 @@ Sistema-Aliment-cio-Kennedy/
 │   └── js/
 │       ├── data.js            # Dados iniciais (cardápio, receitas base, estoque, etc.)
 │       ├── receitas-extras.js # Catálogo ampliado com mais de 1.000 receitas escolares
+│       ├── receitas-ovos-peixes.js # Receitas de ovos e peixes (categorias próprias)
 │       ├── videos-data.js     # Catálogo de vídeos do YouTube por tema
 │       └── app.js          # Lógica, contas, sessão e interações
 ├── render.yaml             # Blueprint de deploy no Render

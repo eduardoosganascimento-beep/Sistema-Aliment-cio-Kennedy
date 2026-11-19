@@ -3,7 +3,7 @@
    Lógica da aplicação
    ============================================================ */
 
-const SGK_RECEITAS_VERSAO = "8";
+const SGK_RECEITAS_VERSAO = "9";
 
 const App = {
   state: {},
@@ -27,10 +27,11 @@ const App = {
   },
 
   carregar() {
-    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio"];
+    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros"];
     // Catálogo base + receitas ampliadas (arquivo separado para não pesar o data.js)
     const receitasBase = (SGK_DATA.receitas || []).concat(
-      typeof SGK_RECEITAS_EXTRAS !== "undefined" ? SGK_RECEITAS_EXTRAS : []
+      typeof SGK_RECEITAS_EXTRAS !== "undefined" ? SGK_RECEITAS_EXTRAS : [],
+      typeof SGK_RECEITAS_OVOS_PEIXES !== "undefined" ? SGK_RECEITAS_OVOS_PEIXES : []
     );
     chaves.forEach((chave) => {
       try {
@@ -322,7 +323,7 @@ const App = {
 
     const titulos = {
       inicio: "Início", cardapio: "Cardápio Semanal", receitas: "Receitas",
-      videos: "Vídeos", estoque: "Estoque", higiene: "Higiene e Boas Práticas",
+      estoque: "Estoque", higiene: "Higiene e Boas Práticas",
       avisos: "Avisos", aprovacoes: "Aprovação de Receitas", relatorio: "Relatório de Desperdício",
     };
     document.getElementById("topbarTitle").textContent = titulos[secao] || "SGK";
@@ -342,6 +343,10 @@ const App = {
       e.title = e.disabled ? "Seu perfil é fixo. Use outra conta para trocar." : "Alternar perfil de acesso";
     }
     const diretora = this.role === "diretora";
+    const ehTia = this.role === "tia";
+    // O cardápio e o checklist são das tias; pedagogas e diretoras acompanham
+    document.querySelectorAll(".so-tia").forEach((n) => (n.style.display = ehTia ? "" : "none"));
+    document.querySelectorAll(".so-nao-tia").forEach((n) => (n.style.display = ehTia ? "none" : ""));
     const rotulos = { tia: "Cozinheira", pedagoga: "Pedagoga", diretora: "Diretora Pedagoga" };
     const avatares = { tia: "👩‍🍳", pedagoga: "📚", diretora: "🎓" };
     const rotulo = rotulos[this.role] || rotulos.tia;
@@ -363,7 +368,6 @@ const App = {
       case "inicio": this.renderInicio(); break;
       case "cardapio": this.renderCardapio(); break;
       case "receitas": this.renderReceitas(); break;
-      case "videos": this.renderVideos(); break;
       case "estoque": this.renderEstoque(); break;
       case "higiene": this.renderHigiene(); break;
       case "avisos": this.renderAvisos(); break;
@@ -414,6 +418,20 @@ const App = {
         </div>`).join("")
       : `<div class="empty-state" style="padding:20px">Nenhum aviso por enquanto.</div>`;
 
+    // Pedagogas e diretoras acompanham o checklist da cozinha também na tela inicial
+    const hc = document.getElementById("homeChecklist");
+    if (hc && this.role !== "tia") {
+      const regs = [...(this.state.checklistRegistros || [])]
+        .sort((a, b) => (b.data + (b.hora || "")).localeCompare(a.data + (a.hora || "")));
+      const ultimo = regs[0];
+      hc.innerHTML = ultimo ? `<div class="mini-item">
+          <span class="mini-ico">✅</span>
+          <div><strong>Checklist concluído por ${this.esc(ultimo.nome)}</strong>
+          <p>${ultimo.itens} de ${ultimo.total} itens de higiene confirmados pela cozinha.</p>
+          <small>📅 ${this.fmtData(ultimo.data)}${ultimo.hora ? " · 🕒 " + this.esc(ultimo.hora) : ""}</small></div>
+        </div>` : `<div class="empty-state" style="padding:20px">Nenhum checklist concluído pela cozinha ainda.</div>`;
+    }
+
     const hoje = new Date();
     const dataFmt = hoje.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
     const elData = document.getElementById("heroDate");
@@ -454,9 +472,16 @@ const App = {
       { ico: "🥪", cor: "bg-blue", label: "Lanche da tarde", txt: c.lanche },
       { ico: "🍰", cor: "bg-purple", label: "Sobremesa", txt: c.sobremesa },
     ];
+    const idxC = this.state.cardapio.indexOf(c);
     document.getElementById("cardapioDetalhe").innerHTML = `
       <div class="cardapio-dia">
-        <h3>${c.emoji} ${this.esc(c.dia)}</h3>
+        <div class="cardapio-dia-head">
+          <h3>${c.emoji} ${this.esc(c.dia)}</h3>
+          ${this.role === "tia" ? `<div class="cardapio-acoes">
+            <button class="btn btn-outline btn-sm" data-edit-cardapio="${idxC}">✏️ Editar dia</button>
+            <button class="btn btn-danger btn-sm" data-del-cardapio="${idxC}">🗑️ Remover</button>
+          </div>` : `<span class="cardapio-somente-tia">📅 Cardápio montado pelas tias</span>`}
+        </div>
         <div class="refeicoes-grid">
           ${ref.map(r => `<div class="refeicao">
             <div class="re-ico ${r.cor}">${r.ico}</div>
@@ -471,6 +496,56 @@ const App = {
         <td>${this.destacar(dia.cafe, busca)}</td><td>${this.destacar(dia.almoco, busca)}</td>
         <td>${this.destacar(dia.lanche, busca)}</td><td>${this.destacar(dia.sobremesa, busca)}</td>
       </tr>`).join("");
+  },
+
+  /* ---------- Cardápio: montar/editar (somente tias) ---------- */
+  formCardapio(indice) {
+    if (this.role !== "tia") {
+      this.toast("Somente as tias (cozinheiras) montam o cardápio.", "info");
+      return;
+    }
+    const editando = Number.isInteger(indice) && !!this.state.cardapio[indice];
+    const c = editando ? this.state.cardapio[indice]
+      : { dia: "Segunda-feira", emoji: "📅", cafe: "", almoco: "", lanche: "", sobremesa: "" };
+    const dias = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"];
+
+    this.abrirModal(editando ? "✏️ Editar dia do cardápio" : "➕ Montar cardápio", `
+      <div class="form-row">
+        <div class="form-group"><label>Dia da semana</label>
+          <select id="c_dia">${dias.map(d => `<option ${c.dia === d ? "selected" : ""}>${d}</option>`).join("")}</select>
+        </div>
+        <div class="form-group"><label>Emoji do dia</label><input id="c_emoji" value="${this.esc(c.emoji || "📅")}" placeholder="🍽️" /></div>
+      </div>
+      <div class="form-group"><label>🌅 Café da manhã</label><textarea id="c_cafe" style="min-height:58px" placeholder="Ex.: Pão integral com manteiga e suco natural">${this.esc(c.cafe)}</textarea></div>
+      <div class="form-group"><label>🍽️ Almoço</label><textarea id="c_almoco" style="min-height:58px" placeholder="Ex.: Arroz, feijão, frango grelhado e salada">${this.esc(c.almoco)}</textarea></div>
+      <div class="form-group"><label>🥪 Lanche da tarde</label><textarea id="c_lanche" style="min-height:58px" placeholder="Ex.: Iogurte com granola">${this.esc(c.lanche)}</textarea></div>
+      <div class="form-group"><label>🍰 Sobremesa</label><textarea id="c_sobremesa" style="min-height:58px" placeholder="Ex.: Fruta da estação">${this.esc(c.sobremesa)}</textarea></div>
+      <p class="hint">Somente as <strong>tias (cozinheiras)</strong> montam o cardápio. As alterações ficam salvas neste navegador.</p>
+    `, `<button class="btn btn-outline" data-fechar-modal>Cancelar</button>
+        <button class="btn btn-primary" id="salvarCardapio">💾 Salvar no cardápio</button>`);
+
+    document.getElementById("salvarCardapio").onclick = () => {
+      const dados = {
+        dia: document.getElementById("c_dia").value,
+        emoji: document.getElementById("c_emoji").value.trim() || "📅",
+        cafe: document.getElementById("c_cafe").value.trim(),
+        almoco: document.getElementById("c_almoco").value.trim(),
+        lanche: document.getElementById("c_lanche").value.trim(),
+        sobremesa: document.getElementById("c_sobremesa").value.trim(),
+      };
+      if (!dados.almoco) { this.toast("Informe pelo menos o almoço do dia.", "erro"); return; }
+      const duplicado = this.state.cardapio.some((d, i) => d.dia === dados.dia && i !== indice);
+      if (duplicado) { this.toast("Esse dia já está no cardápio. Use Editar para alterá-lo.", "erro"); return; }
+
+      if (editando) Object.assign(this.state.cardapio[indice], dados);
+      else this.state.cardapio.push(dados);
+      this.diaCardapio = editando ? indice : this.state.cardapio.length - 1;
+      this.salvar("cardapio");
+      this.fecharModal();
+      this.toast(editando ? "Dia atualizado no cardápio!" : "Dia adicionado ao cardápio!");
+      this.renderCardapio();
+      this.atualizarBadges();
+    };
   },
 
   /* ---------- Receitas ---------- */
@@ -496,6 +571,18 @@ const App = {
       return;
     }
 
+    // Organização: categorias em ordem fixa e receitas em ordem alfabética
+    const ordemCats = ["Prato principal", "Acompanhamento", "Salada", "Ovos", "Peixes", "Salgados", "Sobremesa", "Bebida"];
+    const iconesCats = {
+      "Prato principal": "🍽️", "Acompanhamento": "🍚", "Salada": "🥗", "Ovos": "🥚",
+      "Peixes": "🐟", "Salgados": "🥪", "Sobremesa": "🍰", "Bebida": "🥤",
+    };
+    lista.sort((a, b) => {
+      const ia = ordemCats.indexOf(a.categoria), ib = ordemCats.indexOf(b.categoria);
+      const pa = ia === -1 ? 99 : ia, pb = ib === -1 ? 99 : ib;
+      return pa !== pb ? pa - pb : String(a.nome).localeCompare(String(b.nome), "pt-BR");
+    });
+
     const visiveis = lista.slice(0, this.receitasLimit);
     const grupos = {};
     visiveis.forEach(r => (grupos[r.categoria] = grupos[r.categoria] || []).push(r));
@@ -503,7 +590,7 @@ const App = {
     grid.innerHTML = Object.keys(grupos).map(cat => `
       <div class="receitas-grupo">
         <div class="receitas-grupo-head">
-          <h3>${this.esc(cat)}</h3>
+          <h3>${iconesCats[cat] || "🍽️"} ${this.esc(cat)}</h3>
           <span>${grupos[cat].length} receita(s)</span>
         </div>
         <div class="receitas-grid">
@@ -517,7 +604,6 @@ const App = {
                 <p>${this.esc(r.descricao)}</p>
                 <div class="rc-meta">
                   <span>⏱️ ${this.esc(r.tempo)}</span>
-                  <span>👥 ${this.esc(r.rendimento)}</span>
                 </div>
               </div>
               <div class="rc-foot">
@@ -614,7 +700,6 @@ const App = {
         <div>
           <div class="rc-meta" style="margin-top:0">
             <span>⏱️ ${this.esc(r.tempo)}</span>
-            <span>👥 ${this.esc(r.rendimento)}</span>
             <span>📊 ${this.esc(r.dificuldade || "—")}</span>
           </div>
           <p style="font-size:12.5px;color:var(--muted);margin-top:6px">${this.esc(r.descricao)}</p>
@@ -653,16 +738,13 @@ const App = {
   },
 
   novaReceita() {
-    const cats = ["Prato principal", "Acompanhamento", "Salada", "Sobremesa", "Bebida", "Salgados"];
+    const cats = ["Prato principal", "Acompanhamento", "Salada", "Ovos", "Peixes", "Salgados", "Sobremesa", "Bebida"];
     this.abrirModal("➕ Cadastrar nova receita", `
       <div class="form-row">
         <div class="form-group"><label>Nome da receita</label><input id="f_nome" placeholder="Ex.: Sopa de legumes" /></div>
         <div class="form-group"><label>Categoria</label><select id="f_cat">${cats.map(c => `<option>${c}</option>`).join("")}</select></div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>Tempo de preparo</label><input id="f_tempo" placeholder="Ex.: 40 min" /></div>
-        <div class="form-group"><label>Rendimento</label><input id="f_rend" placeholder="Ex.: 10 porções" /></div>
-      </div>
+      <div class="form-group"><label>Tempo de preparo</label><input id="f_tempo" placeholder="Ex.: 40 min" /></div>
       <div class="form-group"><label>Porcionamento</label><input id="f_porcao" placeholder="Ex.: 1 porção por pessoa" /></div>
       <div class="form-group"><label>Descrição curta</label><textarea id="f_desc" style="min-height:60px" placeholder="Conte um pouco sobre a receita"></textarea></div>
       <div class="form-group"><label>Ingredientes (um por linha: nome | quantidade)</label>
@@ -703,7 +785,6 @@ const App = {
         id: this.uid(), nome, emoji: "🍽️",
         categoria: document.getElementById("f_cat").value,
         tempo: document.getElementById("f_tempo").value.trim() || "—",
-        rendimento: document.getElementById("f_rend").value.trim() || "—",
         porcao: document.getElementById("f_porcao").value.trim(),
         dificuldade: "—",
         status: this.role === "diretora" ? "aprovada" : "pendente",
@@ -915,12 +996,52 @@ const App = {
         <span>${t}</span>
       </label>`).join("");
     this.atualizarProgresso(itensCheck.length);
+    this.renderChecklistRegistros();
   },
 
   atualizarProgresso(total) {
     const n = this.checklist.length;
     document.getElementById("checklistTexto").textContent = `${n} de ${total}`;
     document.getElementById("checklistBar").style.width = total ? (n / total) * 100 + "%" : "0%";
+  },
+
+  /* ---------- Checklist: registro para pedagogas e diretoras ---------- */
+  registrarChecklist() {
+    const hoje = this.hojeISO();
+    const nome = this.usuario?.nome || "Cozinheira";
+    const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const regs = this.state.checklistRegistros || (this.state.checklistRegistros = []);
+    const existente = regs.find(r => r.data === hoje && r.nome === nome);
+    if (existente) {
+      existente.hora = hora;
+      existente.itens = 8;
+      existente.total = 8;
+    } else {
+      regs.push({ id: this.uid(), data: hoje, hora, nome, perfil: this.role, itens: 8, total: 8 });
+    }
+    this.salvar("checklistRegistros");
+    this.renderChecklistRegistros();
+    this.toast("Checklist concluído! Registro enviado para pedagogas e diretoras ✅");
+  },
+
+  renderChecklistRegistros() {
+    const el = document.getElementById("checklistRegistros");
+    if (!el) return;
+    const regs = [...(this.state.checklistRegistros || [])]
+      .sort((a, b) => (b.data + (b.hora || "")).localeCompare(a.data + (a.hora || "")));
+    el.innerHTML = regs.length ? regs.map(r => `
+      <div class="registro-check">
+        <div class="rc-ico">✅</div>
+        <div class="rc-info">
+          <strong>${this.esc(r.nome || "Cozinheira")}</strong>
+          <p>${r.itens} de ${r.total} itens de higiene confirmados — checklist diário concluído.</p>
+          <small>📅 ${this.fmtData(r.data)}${r.hora ? " · 🕒 " + this.esc(r.hora) : ""}</small>
+        </div>
+        <span class="rc-selo">CONCLUÍDO</span>
+      </div>`).join("")
+      : `<div class="empty-state"><span class="es-ico">🧼</span>
+          <h3>Nenhum checklist registrado</h3>
+          <p>Quando as tias concluírem o checklist diário, o registro aparecerá aqui.</p></div>`;
   },
 
   /* ---------- Avisos ---------- */
@@ -992,7 +1113,7 @@ const App = {
           <h4>${this.esc(r.nome)}</h4>
           <p>${this.esc(r.descricao)}</p>
           <div class="rc-meta">
-            <span>⏱️ ${this.esc(r.tempo)}</span><span>👥 ${this.esc(r.rendimento)}</span>
+            <span>⏱️ ${this.esc(r.tempo)}</span>
             <span>🧾 ${r.ingredientes.length} ingredientes</span>
           </div>
         </div>
@@ -1239,11 +1360,6 @@ const App = {
         }
       });
     }
-    (this.state.videos || []).forEach(v => {
-      if (tem(v.titulo, v.canal, v.categoria, v.descricao, v.tipo)) {
-        add("Vídeo", "videos", "🎥", v.titulo, `${v.canal} · ${v.categoria} · ${v.tipo}`, v.titulo);
-      }
-    });
     return out;
   },
 
@@ -1351,6 +1467,7 @@ const App = {
     document.getElementById("btnSair").onclick = () => this.sair();
     document.getElementById("btnNotificacoes").onclick = () => this.irPara("avisos");
     document.getElementById("btnImprimirCardapio").onclick = () => window.print();
+    document.getElementById("btnMontarCardapio").onclick = () => this.formCardapio();
     document.getElementById("semanaTabs").addEventListener("click", (e) => {
       const b = e.target.closest("[data-dia]");
       if (b) { this.diaCardapio = Number(b.dataset.dia); this.renderCardapio(); }
@@ -1375,14 +1492,6 @@ const App = {
         this.renderReceitas();
       }
     });
-    document.getElementById("filtrosVideos").addEventListener("click", (e) => {
-      const c = e.target.closest("[data-video-cat]");
-      if (!c) return;
-      this.filtroVideo = c.dataset.videoCat;
-      document.querySelectorAll("#filtrosVideos .chip").forEach(x => x.classList.toggle("active", x === c));
-      this.renderVideos();
-    });
-    document.getElementById("buscaVideo").addEventListener("input", () => this.renderVideos());
     document.addEventListener("click", (e) => {
       const primeiro = e.target.closest("#btnPrimeiroAlimento");
       if (primeiro) this.formEstoque();
@@ -1393,21 +1502,32 @@ const App = {
         const secao = ir.dataset.irSecao;
         const termo = ir.dataset.termoBusca || "";
         this.fecharModal();
-        if (secao === "videos") {
-          this.filtroVideo = "Todas";
-          document.querySelectorAll("#filtrosVideos .chip").forEach(x =>
-            x.classList.toggle("active", x.dataset.videoCat === "Todas")
-          );
-        }
         this.irPara(secao);
         const campos = {
-          receitas: "buscaReceita", videos: "buscaVideo", estoque: "buscaEstoque", cardapio: "buscaCardapio",
+          receitas: "buscaReceita", estoque: "buscaEstoque", cardapio: "buscaCardapio",
           higiene: "buscaHigiene", avisos: "buscaAvisos", relatorio: "buscaDesperdicio",
         };
         const campo = campos[secao];
         if (campo && termo) {
           const inp = document.getElementById(campo);
           if (inp) { inp.value = termo; this.renderizar(); }
+        }
+      }
+
+      // Cardápio semanal — editar/remover dias (somente tias)
+      const ec = e.target.closest("[data-edit-cardapio]");
+      if (ec) this.formCardapio(Number(ec.dataset.editCardapio));
+      const dc = e.target.closest("[data-del-cardapio]");
+      if (dc) {
+        if (this.role !== "tia") { this.toast("Somente as tias montam o cardápio.", "info"); return; }
+        const idx = Number(dc.dataset.delCardapio);
+        const d = this.state.cardapio[idx];
+        if (d && confirm(`Remover "${d.dia}" do cardápio?`)) {
+          this.state.cardapio.splice(idx, 1);
+          this.diaCardapio = 0;
+          this.salvar("cardapio");
+          this.toast("Dia removido do cardápio.", "info");
+          this.renderCardapio();
         }
       }
 
@@ -1489,7 +1609,7 @@ const App = {
       localStorage.setItem("sgk2_checklist", JSON.stringify(this.checklist));
       c.closest(".check-item").classList.toggle("concluido", c.checked);
       this.atualizarProgresso(8);
-      if (this.checklist.length === 8) this.toast("Checklist completo! Excelente trabalho 🎉");
+      if (this.checklist.length === 8) this.registrarChecklist();
     });
     document.getElementById("resetChecklist").onclick = () => {
       this.checklist = [];
