@@ -69,7 +69,9 @@ receitas, relatório de desperdício e histórico de alterações.
 - ✍️ **Todo conteúdo vindo de formulários é escapado** antes de ir para o HTML
 - ⚠️ **Tratamento global de erros**: falhas inesperadas avisam o usuário em vez de deixar a tela em branco
 - ♿ **Acessibilidade**: foco automático nos modais, `aria-live` nos avisos, navegação por teclado e suporte a `prefers-reduced-motion`
-- 🔒 **Armazenamento tolerante a falhas**: funciona mesmo se o navegador bloquear o `localStorage`
+- 🔒 **Armazenamento tolerante a falhas**: funciona mesmo se o navegador bloquear o `localStorage` (com aviso ao usuário)
+- ♿ **Acessibilidade reforçada**: link "pular para o conteúdo", rótulos em campos e botões de ícone, `aria-current` na navegação, abas com `aria-selected` e foco preso dentro dos modais
+- 🎯 **Detalhes de acabamento**: feedback visual em botões e filtros, barras de progresso com brilho, ícones animados nos estados vazios, limite de avisos na tela e textos corrigidos sobre quem pode gerenciar o estoque
 - 💾 **Backup e restauração**: exporte/importe todos os dados em JSON pelo rodapé (`Backup / Restaurar`)
 - ⚡ **Buscas com debounce**: navegação fluida mesmo com mais de mil receitas
 - ✨ **Acabamento visual**: animações de entrada, modais com vidro fosco, tabelas com cabeçalho fixo e linhas zebradas, microinterações nos botões e cartões

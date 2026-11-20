@@ -22,7 +22,16 @@ const App = {
   // Armazenamento seguro: o site continua funcionando mesmo se o navegador
   // bloquear o localStorage (modo privado, quota cheia etc.).
   lsGet(chave) { try { return localStorage.getItem(chave); } catch (e) { return null; } },
-  lsSet(chave, valor) { try { localStorage.setItem(chave, valor); } catch (e) { return false; } return true; },
+  lsSet(chave, valor) {
+    try { localStorage.setItem(chave, valor); return true; }
+    catch (e) {
+      if (!this._avisoStorage) {
+        this._avisoStorage = true;
+        setTimeout(() => this.toast("Não foi possível salvar: o navegador bloqueou o armazenamento. Use Backup para guardar seus dados.", "erro"), 400);
+      }
+      return false;
+    }
+  },
   lsDel(chave) { try { localStorage.removeItem(chave); } catch (e) { return false; } return true; },
 
   esc(txt) {
@@ -63,6 +72,9 @@ const App = {
         this.state[chave] = JSON.parse(JSON.stringify(chave === "receitas" ? receitasBase : SGK_DATA[chave] || []));
       }
     });
+
+    // Garante que todos os conjuntos de dados sejam arrays, mesmo após um backup inválido
+    chaves.forEach(chave => { if (!Array.isArray(this.state[chave])) this.state[chave] = []; });
 
     // Atualiza o catálogo base SEM apagar receitas cadastradas pelas tias.
     // Só sai do sistema o que a pessoa removeu explicitamente.
@@ -165,7 +177,10 @@ const App = {
     const tabs = document.querySelectorAll(".login-tab");
     tabs.forEach((tab) => {
       tab.addEventListener("click", () => {
-        tabs.forEach((t) => t.classList.toggle("active", t === tab));
+        tabs.forEach((t) => {
+          t.classList.toggle("active", t === tab);
+          t.setAttribute("aria-selected", String(t === tab));
+        });
         const criar = tab.dataset.aba === "criar";
         document.getElementById("formLogin").classList.toggle("oculto", criar);
         document.getElementById("formCriar").classList.toggle("oculto", !criar);
@@ -291,7 +306,8 @@ const App = {
 
   fmtData(iso) {
     if (!iso) return "—";
-    const [a, m, d] = iso.split("-").map(Number);
+    const [a, m, d] = String(iso).split("-").map(Number);
+    if (!a || !m || !d) return "—";
     return new Date(a, m - 1, d).toLocaleDateString("pt-BR");
   },
 
@@ -320,6 +336,7 @@ const App = {
     const ico = tipo === "erro" ? "⚠️" : tipo === "info" ? "ℹ️" : "✅";
     el.className = "toast " + (tipo === "sucesso" ? "" : tipo);
     el.innerHTML = `<span>${ico}</span><span>${this.esc(msg)}</span>`;
+    while (c.children.length >= 4) c.removeChild(c.firstChild);
     c.appendChild(el);
     setTimeout(() => {
       el.classList.add("saindo");
@@ -330,6 +347,17 @@ const App = {
   /* ---------- Modal ---------- */
   abrirModal(titulo, corpo, rodape = "") {
     this._ultimoFoco = document.activeElement;
+    if (this._modalTeclas) document.removeEventListener("keydown", this._modalTeclas);
+    this._modalTeclas = (e) => {
+      if (e.key !== "Tab") return;
+      const focaveis = [...document.querySelectorAll("#modalOverlay button, #modalOverlay input, #modalOverlay select, #modalOverlay textarea, #modalOverlay a[href]")]
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (!focaveis.length) return;
+      const primeiro = focaveis[0], ultimo = focaveis[focaveis.length - 1];
+      if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo.focus(); }
+      else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
+    };
+    document.addEventListener("keydown", this._modalTeclas);
     document.getElementById("modalTitle").textContent = titulo;
     document.getElementById("modalBody").innerHTML = corpo;
     document.getElementById("modalFoot").innerHTML =
@@ -343,6 +371,7 @@ const App = {
   },
 
   fecharModal() {
+    if (this._modalTeclas) { document.removeEventListener("keydown", this._modalTeclas); this._modalTeclas = null; }
     document.getElementById("modalOverlay").classList.remove("aberto");
     document.body.classList.remove("modal-aberto");
     document.body.style.overflow = "";
@@ -363,9 +392,12 @@ const App = {
     const sec = document.getElementById("section-" + secao);
     if (sec) sec.classList.add("active");
 
-    document.querySelectorAll(".nav-item").forEach((n) =>
-      n.classList.toggle("active", n.dataset.section === secao)
-    );
+    document.querySelectorAll(".nav-item").forEach((n) => {
+      const ativo = n.dataset.section === secao;
+      n.classList.toggle("active", ativo);
+      if (ativo) n.setAttribute("aria-current", "page");
+      else n.removeAttribute("aria-current");
+    });
     document.querySelectorAll("#bottomNav [data-section]").forEach((n) => {
       const ativo = n.dataset.section === secao;
       n.classList.toggle("active", ativo);
@@ -680,7 +712,7 @@ const App = {
               <div class="rc-foot">
                 <div style="display:flex;gap:6px;align-items:center">
                   <button class="btn btn-primary btn-sm" data-ver-receita="${r.id}">Ver receita →</button>
-                  <button class="icon-action" title="Remover receita" data-del-receita="${r.id}">🗑️</button>
+                  <button class="icon-action" title="Remover receita" aria-label="Remover receita ${this.esc(r.nome)}" data-del-receita="${r.id}">🗑️</button>
                 </div>
                 <span class="rc-num">${r.passos.length} passos · ${r.ingredientes.length} ingredientes</span>
               </div>
@@ -927,9 +959,9 @@ const App = {
         <td>${this.fmtData(i.validade)}</td>
         <td><span class="badge-status ${s.cls}">${s.txt}</span></td>
         <td><div class="acoes-cell">
-          <button class="icon-action" title="Adicionar quantidade" data-add-estoque="${i.id}">＋</button>
-          <button class="icon-action" title="Editar" data-edit-estoque="${i.id}">✏️</button>
-          <button class="icon-action" title="Remover alimento" data-del-estoque="${i.id}">🗑️</button>
+          <button class="icon-action" title="Adicionar quantidade" aria-label="Adicionar quantidade de ${this.esc(i.item)}" data-add-estoque="${i.id}">＋</button>
+          <button class="icon-action" title="Editar" aria-label="Editar ${this.esc(i.item)}" data-edit-estoque="${i.id}">✏️</button>
+          <button class="icon-action" title="Remover alimento" aria-label="Remover ${this.esc(i.item)}" data-del-estoque="${i.id}">🗑️</button>
         </div></td>
       </tr>`;
     });
@@ -955,7 +987,7 @@ const App = {
         <div class="form-group"><label>Quantidade mínima</label><input id="e_min" type="number" min="0" step="0.1" value="${e.minimo}" /></div>
       </div>
       <div class="form-group"><label>Data de validade</label><input id="e_val" type="date" value="${e.validade}" /></div>
-      <p class="hint">Somente a <strong>Cozinheira</strong> e a <strong>Diretora Pedagoga</strong> podem cadastrar, editar e remover alimentos. O valor total é calculado automaticamente (quantidade × preço).</p>
+      <p class="hint"><strong>Cozinheira, Pedagoga e Diretora Pedagoga</strong> podem cadastrar, editar e remover alimentos. O valor total é calculado automaticamente (quantidade × preço).</p>
     `, `<button class="btn btn-outline" data-fechar-modal>Cancelar</button>
         <button class="btn btn-primary" id="salvarItem">💾 Salvar</button>`);
 
@@ -1083,7 +1115,7 @@ const App = {
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
           ${!a.lido ? `<button class="btn btn-outline btn-sm" data-marcar-lido="${a.id}">Marcar como lido</button>` : ""}
-          <button class="icon-action" title="Remover aviso" data-del-aviso="${a.id}">🗑️</button>
+          <button class="icon-action" title="Remover aviso" aria-label="Remover aviso ${this.esc(a.titulo)}" data-del-aviso="${a.id}">🗑️</button>
         </div>
       </article>`).join("")
       : `<div class="empty-state"><span class="es-ico">🔔</span><h3>Nenhum aviso</h3><p>Os avisos da direção aparecerão aqui.</p></div>`;
@@ -1108,7 +1140,7 @@ const App = {
       this.state.avisos.push({
         id: this.uid(), titulo, texto,
         tipo: document.getElementById("a_tipo").value,
-        autor: "Diretoria Pedagógica", data: this.hojeISO(), lido: false,
+        autor: this.usuario?.nome || "Diretoria Pedagógica", data: this.hojeISO(), lido: false,
       });
       this.salvar("avisos");
       this.registrarAtividade("publicou um aviso", titulo);
@@ -1157,6 +1189,7 @@ const App = {
     (this.state.estoque || []).forEach(i => {
       if (!i.validade || i.validade >= hoje) return;
       const qtd = Number(i.qtd) || 0;
+      if (qtd <= 0) return;
       const jaRegistrado = regs.some(d =>
         d.origemItemId === i.id && d.validadeItem === i.validade && Number(d.qtd) === qtd
       );
@@ -1255,7 +1288,7 @@ const App = {
       <tr><td>${this.fmtData(d.data)}</td><td class="nome-cell">${this.destacar(d.item, busca)}</td>
       <td>${d.qtd} ${this.esc(d.unidade)}</td><td>${this.destacar(d.motivo, busca)}</td>
       <td><strong>${this.fmtMoeda(d.valor)}</strong></td>
-      <td><button class="icon-action" title="Remover registro" data-del-desperdicio="${d.id}">🗑️</button></td></tr>`).join("")
+      <td><button class="icon-action" title="Remover registro" aria-label="Remover registro de ${this.esc(d.item)}" data-del-desperdicio="${d.id}">🗑️</button></td></tr>`).join("")
       : `<tr><td colspan="6" style="text-align:center;padding:24px">${busca ? "Nenhum registro encontrado para essa busca." : "Nenhum desperdício registrado neste mês. 🎉"}</td></tr>`;
 
     // Sugestões
@@ -1760,6 +1793,7 @@ const App = {
     document.getElementById("resetChecklist").onclick = () => {
       this.checklist = [];
       this.lsSet("sgk2_checklist", "[]");
+      this.registrarAtividade("reiniciou o checklist diário", "checklist limpo para novo dia");
       this.renderHigiene();
       this.toast("Checklist reiniciado.", "info");
     };
@@ -1769,7 +1803,7 @@ const App = {
       const b = e.target.closest("[data-marcar-lido]");
       if (!b) return;
       const a = this.state.avisos.find(x => x.id === b.dataset.marcarLido);
-      if (a) { a.lido = true; this.salvar("avisos"); this.renderAvisos(); this.atualizarBadges(); }
+      if (a) { a.lido = true; this.salvar("avisos"); this.registrarAtividade("marcou aviso como lido", a.titulo); this.renderAvisos(); this.atualizarBadges(); }
     });
 
     document.getElementById("btnNovoDesperdicio").onclick = () => this.novoDesperdicio();

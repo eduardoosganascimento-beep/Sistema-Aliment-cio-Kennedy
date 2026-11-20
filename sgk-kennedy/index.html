@@ -30,7 +30,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=19" />
+  <link rel="stylesheet" href="css/styles.css?v=20" />
 </head>
 <body>
   <noscript>
@@ -39,6 +39,7 @@
       <p>O SGK precisa de JavaScript ativado no navegador para funcionar.</p>
     </div>
   </noscript>
+  <a class="skip-link" href="#content">Pular para o conteúdo</a>
 
   <!-- ===== Tela de login ===== -->
   <div class="login-screen" id="loginScreen">
@@ -59,16 +60,17 @@
       </div>
 
       <div class="login-form-area">
-        <div class="login-tabs">
-          <button class="login-tab active" data-aba="entrar">Entrar</button>
-          <button class="login-tab" data-aba="criar">Criar conta</button>
+        <div class="login-tabs" role="tablist" aria-label="Acesso ao sistema">
+          <button class="login-tab active" data-aba="entrar" role="tab" aria-selected="true" aria-controls="formLogin">Entrar</button>
+          <button class="login-tab" data-aba="criar" role="tab" aria-selected="false" aria-controls="formCriar">Criar conta</button>
         </div>
 
         <form class="login-form" id="formLogin">
           <h3>Acessar o sistema</h3>
           <p class="login-sub">Escolha seu perfil e entre com e-mail e senha.</p>
-          <label>Seu perfil</label>
-          <div class="perfil-opcoes" role="radiogroup" aria-label="Selecionar perfil no login">
+          <label for="perfilGrupo">Seu perfil</label>
+          <p class="login-dica">Escolha seu perfil: o e-mail é preenchido automaticamente.</p>
+          <div class="perfil-opcoes" id="perfilGrupo" role="radiogroup" aria-label="Selecionar perfil no login">
             <button type="button" class="perfil-opcao active" data-perfil="tia" role="radio" aria-checked="true">
               <span class="po-ico">👩‍🍳</span><strong>Cozinheira</strong><small>Monta o cardápio</small>
             </button>
@@ -317,7 +319,7 @@
         <div class="filtro-categoria-wrap">
           <span class="rotulo">🔍 Buscar no cardápio:</span>
           <div class="busca-wrap" style="margin-left:0;width:100%;max-width:360px">
-            <span>🔎</span><input type="search" id="buscaCardapio" placeholder="Ex.: frango, suco, sobremesa..." />
+            <span>🔎</span><input type="search" id="buscaCardapio" placeholder="Ex.: frango, suco, sobremesa..." aria-label="Buscar no cardápio" />
           </div>
         </div>
         <div class="semana-tabs" id="semanaTabs"></div>
@@ -361,7 +363,7 @@
           <button class="chip" data-cat="Salgados">Salgados</button>
           <div class="busca-wrap">
             <span>🔍</span>
-            <input type="search" id="buscaReceita" placeholder="Buscar receita..." />
+            <input type="search" id="buscaReceita" placeholder="Buscar receita..." aria-label="Buscar receita" />
           </div>
         </div>
 
@@ -374,7 +376,7 @@
         <div class="page-intro">
           <div>
             <h2>📦 Controle de Estoque</h2>
-            <p>Cadastre alimentos com quantidade, preço e validade. Somente a Cozinheira e a Diretora podem gerenciar. Remova qualquer item quando precisar.</p>
+            <p>Cadastre alimentos com quantidade, preço e validade. Cozinheira, Pedagoga e Diretora podem gerenciar o estoque. Remova qualquer item quando precisar.</p>
           </div>
           <button class="btn btn-primary" id="btnNovoItem">➕ Cadastrar alimento</button>
         </div>
@@ -389,7 +391,7 @@
             <h3>📋 Inventário</h3>
             <div class="busca-wrap">
               <span>🔍</span>
-              <input type="search" id="buscaEstoque" placeholder="Buscar item..." />
+              <input type="search" id="buscaEstoque" placeholder="Buscar item..." aria-label="Buscar item no estoque" />
             </div>
           </div>
           <div class="tabela-wrap">
@@ -416,7 +418,7 @@
         <div class="filtro-categoria-wrap">
           <span class="rotulo">🔍 Buscar dica:</span>
           <div class="busca-wrap" style="margin-left:0;width:100%;max-width:340px">
-            <span>🔎</span><input type="search" id="buscaHigiene" placeholder="Ex.: mãos, geladeira, alergia..." />
+            <span>🔎</span><input type="search" id="buscaHigiene" placeholder="Ex.: mãos, geladeira, alergia..." aria-label="Buscar dica de higiene" />
           </div>
         </div>
         <div class="higiene-banner">
@@ -461,7 +463,7 @@
         <div class="filtro-categoria-wrap">
           <span class="rotulo">🔍 Buscar aviso:</span>
           <div class="busca-wrap" style="margin-left:0;width:100%;max-width:340px">
-            <span>🔎</span><input type="search" id="buscaAvisos" placeholder="Ex.: manutenção, cardápio, entrega..." />
+            <span>🔎</span><input type="search" id="buscaAvisos" placeholder="Ex.: manutenção, cardápio, entrega..." aria-label="Buscar aviso" />
           </div>
         </div>
         <div class="avisos-lista" id="avisosLista"></div>
@@ -506,7 +508,7 @@
             <h3>📋 Registros do mês</h3>
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
               <div class="busca-wrap" style="margin-left:0">
-                <span>🔍</span><input type="search" id="buscaDesperdicio" placeholder="Buscar registro..." />
+                <span>🔍</span><input type="search" id="buscaDesperdicio" placeholder="Buscar registro..." aria-label="Buscar registro de desperdício" />
               </div>
               <button class="link-btn" id="btnExportar">⬇️ Exportar CSV</button>
             </div>
@@ -532,7 +534,7 @@
       <span>© <span id="anoAtual"></span> SGK — Sistema Gerenciador Culinário Kennedy</span>
       <span class="footer-acoes">
         <button class="link-btn" id="btnBackup">💾 Backup / Restaurar</button>
-        <span class="footer-versao">v2.1 · build <span id="buildNum">19</span></span>
+        <span class="footer-versao">v2.2 · build <span id="buildNum">20</span></span>
       </span>
       <span>💙 Feito para apoiar quem cuida da alimentação na escola</span>
     </footer>
@@ -565,10 +567,10 @@
   <!-- ===== Toast ===== -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="js/data.js?v=19"></script>
-  <script src="js/videos-data.js?v=19"></script>
-  <script src="js/receitas-extras.js?v=19"></script>
-  <script src="js/receitas-ovos-peixes.js?v=19"></script>
-  <script src="js/app.js?v=19"></script>
+  <script src="js/data.js?v=20"></script>
+  <script src="js/videos-data.js?v=20"></script>
+  <script src="js/receitas-extras.js?v=20"></script>
+  <script src="js/receitas-ovos-peixes.js?v=20"></script>
+  <script src="js/app.js?v=20"></script>
 </body>
 </html>

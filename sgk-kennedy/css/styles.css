@@ -1246,6 +1246,7 @@ body.claro .historico-item .hi-info strong { color: #0f172a; }
 .login-erro { min-height: 18px; font-size: 11.5px; color: var(--vermelho); margin: 10px 0 2px; }
 .login-submit { width: 100%; padding: 13px; margin-top: 8px; font-size: 13.5px; border-radius: 12px; }
 .login-nota { margin-top: 12px; font-size: 10px; color: var(--muted-2); text-align: center; }
+.login-dica { font-size: 11px; color: var(--muted); margin: -4px 0 10px; }
 @media (max-height: 820px) {
   .login-card { min-height: 0; }
   .login-brand { padding: 30px 34px 24px; }
@@ -1539,3 +1540,40 @@ body.claro .sidebar { background:
 
 body.claro .tabela thead th { background: var(--surface-3); }
 body.claro .tabela tbody tr:not(.grupo-categoria):nth-child(even) { background: rgba(37,99,235,.03); }
+
+/* ============================================================
+   Acabamento final — detalhes de acessibilidade e interação
+   ============================================================ */
+.skip-link {
+  position: fixed; top: -60px; left: 16px; z-index: 9999;
+  background: var(--primaria-forte); color: #fff; font-weight: 700;
+  padding: 10px 16px; border-radius: 10px; text-decoration: none;
+  box-shadow: var(--sombra-md); transition: top .2s ease;
+}
+.skip-link:focus { top: 12px; }
+
+.login-tab[aria-selected="true"] { box-shadow: inset 0 -2px 0 var(--primaria); }
+.nav-item[aria-current="page"] { box-shadow: inset 3px 0 0 var(--primaria); }
+.chip { transition: transform .15s ease, background .18s ease, border-color .18s ease, color .18s ease; }
+.chip:hover { transform: translateY(-1px); }
+.chip.active { box-shadow: 0 4px 14px rgba(37,99,235,.18); }
+
+.empty-state .es-ico { display: inline-block; animation: sgk-flutuar 3s ease-in-out infinite; }
+@keyframes sgk-flutuar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+.tabela thead th { letter-spacing: .3px; text-transform: uppercase; font-size: 10.5px; }
+.tabela td { vertical-align: middle; }
+
+.toast { max-width: min(420px, calc(100vw - 32px)); }
+.progress-fill { position: relative; overflow: hidden; }
+.progress-fill::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: translateX(-100%); animation: sgk-brilho 2.2s ease-in-out infinite;
+}
+@keyframes sgk-brilho { 0% { transform: translateX(-100%); } 60%,100% { transform: translateX(100%); } }
+
+#modalOverlay .modal { max-height: min(88vh, 900px); }
+#modalBody { scrollbar-width: thin; }
+::-webkit-scrollbar-thumb { background: rgba(96,165,250,.35); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(96,165,250,.6); }
