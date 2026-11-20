@@ -70,6 +70,9 @@ receitas, relatório de desperdício e histórico de alterações.
 - ⚠️ **Tratamento global de erros**: falhas inesperadas avisam o usuário em vez de deixar a tela em branco
 - ♿ **Acessibilidade**: foco automático nos modais, `aria-live` nos avisos, navegação por teclado e suporte a `prefers-reduced-motion`
 - 🔒 **Armazenamento tolerante a falhas**: funciona mesmo se o navegador bloquear o `localStorage`
+- 💾 **Backup e restauração**: exporte/importe todos os dados em JSON pelo rodapé (`Backup / Restaurar`)
+- ⚡ **Buscas com debounce**: navegação fluida mesmo com mais de mil receitas
+- ✨ **Acabamento visual**: animações de entrada, modais com vidro fosco, tabelas com cabeçalho fixo e linhas zebradas, microinterações nos botões e cartões
 
 ---
 

@@ -1480,3 +1480,62 @@ body.claro .sidebar { background:
   body.modal-aberto .modal * { color: #111 !important; }
   body.modal-aberto .modal .passo-num { color: #fff !important; background: #333 !important; }
 }
+
+/* ============================================================
+   Acabamento sênior — microinterações, profundidade e ritmo
+   ============================================================ */
+@keyframes sgk-entrar { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes sgk-modal { from { opacity: 0; transform: translateY(14px) scale(.975); } to { opacity: 1; transform: none; } }
+@keyframes sgk-toast { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+
+.section.active > * { animation: sgk-entrar .38s cubic-bezier(.2,.8,.2,1) both; }
+.section.active > *:nth-child(2) { animation-delay: .05s; }
+.section.active > *:nth-child(3) { animation-delay: .1s; }
+.section.active > *:nth-child(4) { animation-delay: .15s; }
+
+.modal-overlay.aberto .modal { animation: sgk-modal .28s cubic-bezier(.2,.9,.25,1) both; }
+.modal-overlay.aberto { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.toast { animation: sgk-toast .3s cubic-bezier(.2,.9,.25,1) both; }
+.toast.saindo { animation: none; }
+
+/* Cartões com respiração e elevação consistente */
+.stat-card, .panel, .cardapio-dia, .hig-card, .aviso-card, .aprovacao-card {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.stat-card:hover, .quick-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(96,165,250,.42);
+  box-shadow: var(--glow);
+}
+.panel:hover { border-color: rgba(96,165,250,.26); }
+
+/* Tabelas mais fáceis de ler */
+.tabela thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-2); }
+.tabela tbody tr:not(.grupo-categoria):nth-child(even) { background: rgba(96,165,250,.035); }
+.tabela tbody tr:not(.grupo-categoria):hover { background: rgba(96,165,250,.075); }
+.tabela tbody td { transition: background .15s ease; }
+
+/* Botões com feedback tátil */
+.btn:active, .quick-card:active, .dia-tab:active { transform: scale(.98); }
+.btn { transition: transform .16s ease, filter .16s ease, box-shadow .2s ease, background .2s ease; }
+.btn:hover { filter: brightness(1.08); }
+
+/* Rodapé com ações e versão */
+.footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.footer-acoes { display: inline-flex; align-items: center; gap: 14px; }
+.footer-versao { font-size: 10px; letter-spacing: .4px; color: var(--muted-2); }
+
+/* Realce sutil no herói */
+.hero { position: relative; overflow: hidden; }
+.hero::after {
+  content: ""; position: absolute; inset: -40% -10% auto auto; width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(34,211,238,.10), transparent 68%);
+  pointer-events: none;
+}
+.hero-date { display: inline-block; padding: 4px 12px; border-radius: 20px; background: var(--primaria-tinto); color: var(--verde-escuro); }
+
+/* Área de backup com aparência de código */
+#backupJson { resize: vertical; line-height: 1.45; background: var(--surface-2) !important; }
+
+body.claro .tabela thead th { background: var(--surface-3); }
+body.claro .tabela tbody tr:not(.grupo-categoria):nth-child(even) { background: rgba(37,99,235,.03); }

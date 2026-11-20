@@ -37,6 +37,15 @@ const App = {
     return m ? `https://www.youtube.com/watch?v=${m[0]}` : "";
   },
 
+  // Evita recalcular a lista a cada tecla digitada (importante com 1.000+ receitas)
+  debounce(fn, espera = 180) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), espera);
+    };
+  },
+
   carregar() {
     const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades"];
     // Catálogo base + receitas ampliadas (arquivo separado para não pesar o data.js)
@@ -1323,6 +1332,74 @@ const App = {
     this.toast("Relatório exportado em CSV!");
   },
 
+  /* ---------- Backup e restauração ---------- */
+  abrirBackup() {
+    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades"];
+    const dados = {};
+    chaves.forEach(c => { dados[c] = this.state[c] || []; });
+    const json = JSON.stringify({ formato: "sgk-backup", versao: 1, exportadoEm: new Date().toISOString(), dados }, null, 2);
+
+    this.abrirModal("💾 Backup e restauração", `
+      <p class="hint">Guarde uma cópia de <strong>todas</strong> as receitas, cardápios, estoque e histórico. O arquivo pode ser restaurado depois em outro navegador.</p>
+      <div class="form-group"><label>Conteúdo do backup (JSON)</label>
+        <textarea id="backupJson" spellcheck="false" style="min-height:170px;font-family:ui-monospace,monospace;font-size:11px">${this.esc(json)}</textarea>
+      </div>
+      <div class="form-group"><label>Restaurar de um arquivo .json</label>
+        <input type="file" id="backupFile" accept="application/json,.json" />
+      </div>
+      <p class="hint">A restauração <strong>substitui os dados atuais</strong>. Baixe um backup antes de continuar.</p>
+    `, `<button class="btn btn-outline" data-fechar-modal>Fechar</button>
+        <button class="btn btn-outline" id="backupBaixar">⬇️ Baixar arquivo</button>
+        <button class="btn btn-primary" id="backupRestaurar">⬆️ Restaurar dados</button>`);
+
+    document.getElementById("backupBaixar").onclick = () => {
+      const blob = new Blob([document.getElementById("backupJson").value], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `sgk-backup-${this.hojeISO()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      this.toast("Backup baixado!");
+    };
+
+    const restaurar = (texto) => this.aplicarBackup(texto);
+    document.getElementById("backupRestaurar").onclick = () => {
+      const arquivo = document.getElementById("backupFile").files[0];
+      if (arquivo) {
+        const leitor = new FileReader();
+        leitor.onload = () => restaurar(String(leitor.result));
+        leitor.onerror = () => this.toast("Não foi possível ler o arquivo.", "erro");
+        leitor.readAsText(arquivo);
+      } else {
+        restaurar(document.getElementById("backupJson").value);
+      }
+    };
+  },
+
+  aplicarBackup(texto) {
+    try {
+      const obj = JSON.parse(texto);
+      const dados = obj && obj.dados ? obj.dados : obj;
+      if (!dados || typeof dados !== "object") throw new Error("formato inválido");
+      let total = 0;
+      Object.keys(dados).forEach(chave => {
+        if (!Array.isArray(dados[chave])) return;
+        this.state[chave] = dados[chave];
+        this.salvar(chave);
+        total++;
+      });
+      if (!total) throw new Error("nenhum dado válido");
+      this.fecharModal();
+      this.registrarAtividade("restaurou um backup", `${total} conjuntos de dados`);
+      this.toast("Dados restaurados com sucesso!");
+      this.renderizar();
+      this.atualizarBadges();
+    } catch (e) {
+      this.toast("Backup inválido. Verifique o arquivo.", "erro");
+    }
+  },
+
   /* ---------- Busca global ---------- */
   abrirBuscaGlobal(termo) {
     if (this.buscaAberta) {
@@ -1481,14 +1558,19 @@ const App = {
       this.formEstoque();
     };
 
-    // Busca global e buscas por seção
-    document.getElementById("buscaGlobal").addEventListener("input", (e) => {
+    // Busca global e buscas por seção (com debounce para não travar a interface)
+    const buscaDebounced = (id, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", this.debounce(fn, 180));
+    };
+    const globalEl = document.getElementById("buscaGlobal");
+    globalEl.addEventListener("input", this.debounce((e) => {
       if (e.target.value.trim().length >= 2) this.abrirBuscaGlobal(e.target.value);
-    });
-    document.getElementById("buscaCardapio").addEventListener("input", () => this.renderCardapio());
-    document.getElementById("buscaHigiene").addEventListener("input", () => this.renderHigiene());
-    document.getElementById("buscaAvisos").addEventListener("input", () => this.renderAvisos());
-    document.getElementById("buscaDesperdicio").addEventListener("input", () => this.renderRelatorio());
+    }, 220));
+    buscaDebounced("buscaCardapio", () => this.renderCardapio());
+    buscaDebounced("buscaHigiene", () => this.renderHigiene());
+    buscaDebounced("buscaAvisos", () => this.renderAvisos());
+    buscaDebounced("buscaDesperdicio", () => this.renderRelatorio());
     document.getElementById("filtrosEstoque").addEventListener("click", (e) => {
       const c = e.target.closest("[data-cat-estoque]");
       if (c) { this.filtroCategoriaEstoque = c.dataset.catEstoque; this.renderEstoque(); }
@@ -1519,6 +1601,7 @@ const App = {
     document.getElementById("btnImprimirCardapio").onclick = () => window.print();
     document.getElementById("btnMontarCardapio").onclick = () => this.formCardapio();
     document.getElementById("btnHistorico").onclick = () => this.abrirHistorico();
+    document.getElementById("btnBackup").onclick = () => this.abrirBackup();
 
     // Botão voltar ao topo
     const btnTopo = document.getElementById("btnTopo");
@@ -1538,10 +1621,10 @@ const App = {
       document.querySelectorAll("#filtrosReceitas .chip").forEach(x => x.classList.toggle("active", x === c));
       this.renderReceitas();
     });
-    document.getElementById("buscaReceita").addEventListener("input", () => {
+    document.getElementById("buscaReceita").addEventListener("input", this.debounce(() => {
       this.receitasLimit = 60;
       this.renderReceitas();
-    });
+    }, 200));
     document.getElementById("receitasGrid").addEventListener("click", (e) => {
       if (e.target.closest("#maisReceitas")) {
         this.receitasLimit += 60;
@@ -1636,7 +1719,7 @@ const App = {
     });
 
     document.getElementById("btnNovoItem").onclick = () => this.formEstoque();
-    document.getElementById("buscaEstoque").addEventListener("input", () => this.renderEstoque());
+    document.getElementById("buscaEstoque").addEventListener("input", this.debounce(() => this.renderEstoque(), 180));
     document.getElementById("estoqueTbody").addEventListener("click", (e) => {
       const add = e.target.closest("[data-add-estoque]");
       const edit = e.target.closest("[data-edit-estoque]");
