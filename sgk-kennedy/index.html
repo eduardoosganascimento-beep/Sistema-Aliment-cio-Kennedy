@@ -7,6 +7,10 @@
   <meta name="application-name" content="SGK Kennedy" />
   <meta name="theme-color" content="#04050a" />
   <meta name="color-scheme" content="dark light" />
+  <!-- Política de segurança: só executa scripts e carrega recursos locais (exceto fontes do Google) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="robots" content="index, follow" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -26,9 +30,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=17" />
+  <link rel="stylesheet" href="css/styles.css?v=18" />
 </head>
 <body>
+  <noscript>
+    <div style="padding:24px;text-align:center;font-family:sans-serif">
+      <h1>JavaScript necessário</h1>
+      <p>O SGK precisa de JavaScript ativado no navegador para funcionar.</p>
+    </div>
+  </noscript>
+
   <!-- ===== Tela de login ===== -->
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
@@ -69,10 +80,10 @@
             </button>
           </div>
           <label for="loginEmail">E-mail</label>
-          <div class="campo-login"><span>✉️</span><input type="email" id="loginEmail" placeholder="voce@escola.com" autocomplete="username" required /></div>
+          <div class="campo-login"><span>✉️</span><input type="email" id="loginEmail" placeholder="voce@escola.com" autocomplete="username" maxlength="120" required /></div>
           <label for="loginSenha">Senha</label>
           <div class="campo-login"><span>🔒</span>
-            <input type="password" id="loginSenha" placeholder="Sua senha" autocomplete="current-password" required />
+            <input type="password" id="loginSenha" placeholder="Sua senha" autocomplete="current-password" maxlength="128" required />
             <button type="button" class="ver-senha" data-ver-senha="loginSenha" aria-label="Mostrar senha" title="Mostrar senha">👁️</button>
           </div>
           <div class="login-erro" id="loginErro"></div>
@@ -84,12 +95,12 @@
           <h3>Criar sua conta</h3>
           <p class="login-sub">Escolha seu perfil e crie sua conta.</p>
           <label for="criarNome">Nome</label>
-          <div class="campo-login"><span>👤</span><input type="text" id="criarNome" placeholder="Seu nome" autocomplete="name" required /></div>
+          <div class="campo-login"><span>👤</span><input type="text" id="criarNome" placeholder="Seu nome" autocomplete="name" maxlength="80" required /></div>
           <label for="criarEmail">E-mail</label>
-          <div class="campo-login"><span>✉️</span><input type="email" id="criarEmail" placeholder="voce@escola.com" autocomplete="username" required /></div>
+          <div class="campo-login"><span>✉️</span><input type="email" id="criarEmail" placeholder="voce@escola.com" autocomplete="username" maxlength="120" required /></div>
           <label for="criarSenha">Senha</label>
           <div class="campo-login"><span>🔒</span>
-            <input type="password" id="criarSenha" placeholder="Mínimo 4 caracteres" minlength="4" autocomplete="new-password" required />
+            <input type="password" id="criarSenha" placeholder="Mínimo 4 caracteres" minlength="4" maxlength="128" autocomplete="new-password" required />
             <button type="button" class="ver-senha" data-ver-senha="criarSenha" aria-label="Mostrar senha" title="Mostrar senha">👁️</button>
           </div>
           <label for="criarPerfil">Perfil</label>
@@ -550,10 +561,10 @@
   <!-- ===== Toast ===== -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="js/data.js?v=17"></script>
-  <script src="js/videos-data.js?v=17"></script>
-  <script src="js/receitas-extras.js?v=17"></script>
-  <script src="js/receitas-ovos-peixes.js?v=17"></script>
-  <script src="js/app.js?v=17"></script>
+  <script src="js/data.js?v=18"></script>
+  <script src="js/videos-data.js?v=18"></script>
+  <script src="js/receitas-extras.js?v=18"></script>
+  <script src="js/receitas-ovos-peixes.js?v=18"></script>
+  <script src="js/app.js?v=18"></script>
 </body>
 </html>

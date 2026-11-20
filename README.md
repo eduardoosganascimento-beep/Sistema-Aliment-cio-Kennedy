@@ -32,7 +32,9 @@ receitas, relatório de desperdício e histórico de alterações.
 
 > ⚠️ Os dados ficam no `localStorage` do navegador. Não há servidor nem banco de
 > dados: o comprovante de higiene e o histórico aparecem no **mesmo
-> navegador/dispositivo** usado pela tia.
+> navegador/dispositivo** usado pela tia. O login é demonstrativo (feito no
+> cliente); para uso real com várias pessoas e dispositivos, seria necessário
+> um backend com banco de dados, autenticação e controle de acesso.
 
 ---
 
@@ -59,6 +61,15 @@ receitas, relatório de desperdício e histórico de alterações.
 - 📊 Relatório mensal de desperdício com gráficos, prejuízo estimado, sugestões e exportação CSV
 - 🎨 Tema preto e azul (Obsidian Blue), com opção de tema claro
 - 📱 Navegação inferior no celular e interface responsiva
+
+### Segurança e qualidade
+- 🛡️ **Content Security Policy (CSP)**: só scripts e recursos locais (exceto fontes do Google); sem scripts inline, `eval` ou frames
+- 🔗 **Links do YouTube validados**: apenas IDs válidos de 11 caracteres geram links
+- 📄 **CSV protegido contra injeção de fórmulas** em planilhas
+- ✍️ **Todo conteúdo vindo de formulários é escapado** antes de ir para o HTML
+- ⚠️ **Tratamento global de erros**: falhas inesperadas avisam o usuário em vez de deixar a tela em branco
+- ♿ **Acessibilidade**: foco automático nos modais, `aria-live` nos avisos, navegação por teclado e suporte a `prefers-reduced-motion`
+- 🔒 **Armazenamento tolerante a falhas**: funciona mesmo se o navegador bloquear o `localStorage`
 
 ---
 

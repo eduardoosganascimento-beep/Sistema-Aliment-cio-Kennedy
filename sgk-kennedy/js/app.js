@@ -31,6 +31,12 @@ const App = {
       .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   },
 
+  // Só aceita IDs válidos do YouTube (11 caracteres) antes de montar a URL.
+  ytUrl(id) {
+    const m = String(id || "").match(/^[A-Za-z0-9_-]{11}$/);
+    return m ? `https://www.youtube.com/watch?v=${m[0]}` : "";
+  },
+
   carregar() {
     const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades"];
     // Catálogo base + receitas ampliadas (arquivo separado para não pesar o data.js)
@@ -314,6 +320,7 @@ const App = {
 
   /* ---------- Modal ---------- */
   abrirModal(titulo, corpo, rodape = "") {
+    this._ultimoFoco = document.activeElement;
     document.getElementById("modalTitle").textContent = titulo;
     document.getElementById("modalBody").innerHTML = corpo;
     document.getElementById("modalFoot").innerHTML =
@@ -321,6 +328,9 @@ const App = {
     document.getElementById("modalOverlay").classList.add("aberto");
     document.body.classList.add("modal-aberto");
     document.body.style.overflow = "hidden";
+    const alvo = document.querySelector("#modalBody input, #modalBody textarea, #modalBody select")
+      || document.querySelector("#modalFoot button");
+    if (alvo) alvo.focus();
   },
 
   fecharModal() {
@@ -328,6 +338,7 @@ const App = {
     document.body.classList.remove("modal-aberto");
     document.body.style.overflow = "";
     this.buscaAberta = false;
+    if (this._ultimoFoco && document.contains(this._ultimoFoco)) this._ultimoFoco.focus();
   },
 
   /* ---------- Navegação ---------- */
@@ -705,11 +716,15 @@ const App = {
       </div>` : ""}
       ${videos.length ? `<div class="modal-section-title">🎥 Vídeos para aprender</div>
       <div class="receita-videos">
-        ${videos.map(v => `<a class="receita-video" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">
-          <span class="rv-play">▶</span>
-          <span class="rv-info"><strong>${this.esc(v.titulo)}</strong><small>${this.esc(v.canal)} · ${this.esc(v.tipo)}</small></span>
-          <span class="rv-go">↗</span>
-        </a>`).join("")}
+        ${videos.map(v => {
+          const url = this.ytUrl(v.id);
+          if (!url) return "";
+          return `<a class="receita-video" href="${url}" target="_blank" rel="noopener noreferrer">
+            <span class="rv-play">▶</span>
+            <span class="rv-info"><strong>${this.esc(v.titulo)}</strong><small>${this.esc(v.canal)} · ${this.esc(v.tipo)}</small></span>
+            <span class="rv-go">↗</span>
+          </a>`;
+        }).join("")}
       </div>` : ""}
       <div class="modal-section-title">🛒 Ingredientes</div>
       <div class="modal-ingredientes">
@@ -728,7 +743,7 @@ const App = {
         <ul>${r.higiene.map(h => `<li>${this.esc(h)}</li>`).join("")}</ul>
       </div>` : ""}
     `, `<button class="btn btn-outline" data-fechar-modal>Fechar</button>
-        <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir receita</button>`);
+        <button class="btn btn-primary" data-imprimir-receita>🖨️ Imprimir receita</button>`);
   },
 
   novaReceita() {
@@ -1290,9 +1305,15 @@ const App = {
   },
 
   exportarCSV() {
+    // Proteção contra injeção de fórmulas em planilhas (CSV Injection)
+    const seguro = (v) => {
+      let s = String(v ?? "");
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return `"${s.replace(/"/g, '""')}"`;
+    };
     const linhas = [["Data", "Item", "Quantidade", "Unidade", "Motivo", "Valor (R$)"]];
     this.desperdicioDoMes().forEach(d => linhas.push([d.data, d.item, d.qtd, d.unidade, d.motivo, d.valor]));
-    const csv = "\uFEFF" + linhas.map(l => l.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n");
+    const csv = "\uFEFF" + linhas.map(l => l.map(seguro).join(";")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
     const a = document.createElement("a");
     a.href = url;
@@ -1338,7 +1359,7 @@ const App = {
     area.innerHTML = `<div class="resumo-busca">${resultados.length} resultado(s) para "<strong>${this.esc(termo)}</strong>"</div>` +
       (resultados.length ? resultados.map(r => `
         <button class="resultado-busca" data-ir-secao="${r.secao}" data-termo-busca="${this.esc(r.termo || "")}">
-          <span class="rb-ico">${r.icone}</span>
+          <span class="rb-ico">${this.esc(r.icone)}</span>
           <span style="flex:1">
             <span class="rb-tipo">${this.esc(r.tipo)}</span>
             <span class="rb-titulo">${this.destacar(r.titulo, termo)}</span>
@@ -1477,6 +1498,7 @@ const App = {
     document.getElementById("modalOverlay").addEventListener("click", (e) => {
       if (e.target.id === "modalOverlay") this.fecharModal();
       if (e.target.closest("[data-fechar-modal]")) this.fecharModal();
+      if (e.target.closest("[data-imprimir-receita]")) window.print();
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
@@ -1673,6 +1695,26 @@ const App = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Falhas inesperadas não devem deixar a tela em branco sem explicação
+  const avisarErro = () => {
+    const c = document.getElementById("toastContainer");
+    if (!c || c.dataset.erroGlobal) return;
+    c.dataset.erroGlobal = "1";
+    const el = document.createElement("div");
+    el.className = "toast erro";
+    el.innerHTML = `<span>⚠️</span><span>Algo não funcionou como esperado. Recarregue a página se necessário.</span>`;
+    c.appendChild(el);
+    setTimeout(() => el.remove(), 7000);
+  };
+  window.addEventListener("error", (e) => {
+    console.error("SGK — erro inesperado:", e.error || e.message);
+    avisarErro();
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    console.error("SGK — promessa rejeitada:", e.reason);
+    avisarErro();
+  });
+
   App.carregar();
   App.initLogin();
   if (App.verificarSessao()) {
