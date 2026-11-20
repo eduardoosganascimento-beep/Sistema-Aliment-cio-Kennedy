@@ -866,6 +866,21 @@ body.claro .registro-check .rc-info strong { color: #0f172a; }
 .historico-item .hi-info small { font-size: 10px; color: var(--muted-2); }
 body.claro .historico-item .hi-info strong { color: #0f172a; }
 
+/* Botão voltar ao topo */
+.btn-topo {
+  position: fixed; right: 18px; bottom: 24px; z-index: 90;
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid rgba(96,165,250,.45);
+  background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(14,165,233,.85));
+  color: #fff; font-size: 20px; font-weight: 900; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  opacity: 0; visibility: hidden; transform: translateY(8px);
+  transition: opacity .2s, transform .2s, visibility .2s;
+}
+.btn-topo.visivel { opacity: 1; visibility: visible; transform: translateY(0); }
+.btn-topo:hover { filter: brightness(1.12); }
+@media (max-width: 900px) { .btn-topo { bottom: 86px; } }
+
 /* ============================================================
    Avisos / Aprovações
    ============================================================ */
@@ -1230,23 +1245,7 @@ body.claro .historico-item .hi-info strong { color: #0f172a; }
 .campo-login .ver-senha:hover { opacity: 1; background: var(--surface-3); }
 .login-erro { min-height: 18px; font-size: 11.5px; color: var(--vermelho); margin: 10px 0 2px; }
 .login-submit { width: 100%; padding: 13px; margin-top: 8px; font-size: 13.5px; border-radius: 12px; }
-.login-hint {
-  margin-top: 18px; padding: 12px 14px; border-radius: 12px;
-  background: linear-gradient(100deg, rgba(59,130,246,.10), rgba(59,130,246,.02));
-  border: 1px solid rgba(96,165,250,.20);
-  font-size: 10.8px; color: var(--muted); line-height: 1.7;
-}
-.login-hint > strong { display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #93c5fd; margin-bottom: 8px; }
-.login-hint-contas { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(96,165,250,.18); font-size: 10.5px; line-height: 1.55; color: var(--muted); }
-.login-hint-contas strong { color: #bfdbfe; }
 .login-nota { margin-top: 12px; font-size: 10px; color: var(--muted-2); text-align: center; }
-.login-demo { display: flex; gap: 7px; flex-wrap: wrap; }
-.demo-btn {
-  border: 1px dashed rgba(96,165,250,.45); background: rgba(59,130,246,.08);
-  color: #93c5fd; border-radius: 8px; padding: 4px 9px;
-  font-size: 10.5px; font-weight: 700; transition: background .18s, border-color .18s;
-}
-.demo-btn:hover { background: rgba(59,130,246,.18); border-color: rgba(96,165,250,.75); }
 @media (max-height: 820px) {
   .login-card { min-height: 0; }
   .login-brand { padding: 30px 34px 24px; }

@@ -19,6 +19,12 @@ const App = {
   buscaAberta: false,
 
   /* ---------- Utilitários ---------- */
+  // Armazenamento seguro: o site continua funcionando mesmo se o navegador
+  // bloquear o localStorage (modo privado, quota cheia etc.).
+  lsGet(chave) { try { return localStorage.getItem(chave); } catch (e) { return null; } },
+  lsSet(chave, valor) { try { localStorage.setItem(chave, valor); } catch (e) { return false; } return true; },
+  lsDel(chave) { try { localStorage.removeItem(chave); } catch (e) { return false; } return true; },
+
   esc(txt) {
     return String(txt ?? "")
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -34,7 +40,7 @@ const App = {
     );
     chaves.forEach((chave) => {
       try {
-        const salvo = localStorage.getItem("sgk2_" + chave);
+        const salvo = this.lsGet("sgk2_" + chave);
         this.state[chave] = salvo
           ? JSON.parse(salvo)
           : JSON.parse(JSON.stringify(chave === "receitas" ? receitasBase : SGK_DATA[chave] || []));
@@ -45,19 +51,19 @@ const App = {
 
     // Atualiza o catálogo base SEM apagar receitas cadastradas pelas tias.
     // Só sai do sistema o que a pessoa removeu explicitamente.
-    if (localStorage.getItem("sgk2_receitas_versao") !== SGK_RECEITAS_VERSAO) {
+    if (this.lsGet("sgk2_receitas_versao") !== SGK_RECEITAS_VERSAO) {
       const bases = new Set(receitasBase.map(r => r.id));
       const cadastradas = (this.state.receitas || []).filter(r => !bases.has(r.id));
       this.state.receitas = JSON.parse(JSON.stringify(receitasBase)).concat(cadastradas);
-      localStorage.setItem("sgk2_receitas", JSON.stringify(this.state.receitas));
-      localStorage.setItem("sgk2_receitas_versao", SGK_RECEITAS_VERSAO);
+      this.lsSet("sgk2_receitas", JSON.stringify(this.state.receitas));
+      this.lsSet("sgk2_receitas_versao", SGK_RECEITAS_VERSAO);
     }
 
     // Catálogo de vídeos (conteúdo fixo, sempre atualizado pelo arquivo)
     this.state.videos = typeof SGK_VIDEOS !== "undefined" ? SGK_VIDEOS : [];
 
-    this.role = localStorage.getItem("sgk2_role") || "tia";
-    this.checklist = JSON.parse(localStorage.getItem("sgk2_checklist") || "[]");
+    this.role = this.lsGet("sgk2_role") || "tia";
+    this.checklist = JSON.parse(this.lsGet("sgk2_checklist") || "[]");
     this.carregarContas();
     // Itens com validade vencida passam a contar como desperdício automaticamente
     this.registrarVencidosComoDesperdicio();
@@ -71,18 +77,19 @@ const App = {
       { email: "diretora@kennedy.escola.br", senha: senhaPadrao, nome: "Diretora Pedagoga", perfil: "diretora" },
     ];
 
-    // Limpeza única: remove contas criadas em sessões anteriores,
-    // mantendo apenas as contas oficiais do sistema.
+    // Mantém as contas oficiais e as contas criadas pelas tias.
+    // Nenhuma conta é apagada automaticamente.
     const VERSAO_CONTAS = 3;
-    const versaoSalva = Number(localStorage.getItem("sgk2_contas_versao") || "0");
-    if (versaoSalva < VERSAO_CONTAS) {
-      localStorage.removeItem("sgk2_contas");
-      localStorage.setItem("sgk2_contas_versao", String(VERSAO_CONTAS));
+    if (Number(this.lsGet("sgk2_contas_versao") || "0") !== VERSAO_CONTAS) {
+      this.lsSet("sgk2_contas_versao", String(VERSAO_CONTAS));
     }
 
     try {
-      const salvo = JSON.parse(localStorage.getItem("sgk2_contas"));
-      this.contas = Array.isArray(salvo) && salvo.length ? salvo : padrao;
+      const salvo = JSON.parse(this.lsGet("sgk2_contas"));
+      const criadas = Array.isArray(salvo)
+        ? salvo.filter(c => !padrao.some(p => p.email === c.email))
+        : [];
+      this.contas = [...padrao, ...criadas];
     } catch (e) {
       this.contas = padrao;
     }
@@ -94,7 +101,7 @@ const App = {
   },
 
   salvarContas() {
-    localStorage.setItem("sgk2_contas", JSON.stringify(this.contas));
+    this.lsSet("sgk2_contas", JSON.stringify(this.contas));
   },
 
   hashSenha(s) {
@@ -104,7 +111,7 @@ const App = {
   },
 
   verificarSessao() {
-    const email = localStorage.getItem("sgk2_sessao");
+    const email = this.lsGet("sgk2_sessao");
     const conta = this.contas.find((c) => c.email === email);
     if (conta) {
       this.usuario = conta;
@@ -117,8 +124,8 @@ const App = {
   entrar(conta) {
     this.usuario = conta;
     this.role = conta.perfil;
-    localStorage.setItem("sgk2_sessao", conta.email);
-    localStorage.setItem("sgk2_role", conta.perfil);
+    this.lsSet("sgk2_sessao", conta.email);
+    this.lsSet("sgk2_role", conta.perfil);
     document.getElementById("loginScreen").classList.add("oculto");
     this.iniciarApp();
     this.toast(`Olá, ${conta.nome}! Bem-vinda ao SGK.`);
@@ -126,7 +133,7 @@ const App = {
 
   sair() {
     this.fecharModal();
-    localStorage.removeItem("sgk2_sessao");
+    this.lsDel("sgk2_sessao");
     this.usuario = null;
     const busca = document.getElementById("buscaGlobal");
     if (busca) busca.value = "";
@@ -183,16 +190,6 @@ const App = {
     };
     opcoesPerfil.forEach((b) => b.addEventListener("click", () => selecionarPerfil(b.dataset.perfil)));
 
-    // Contas de demonstração
-    document.querySelectorAll("[data-demo]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const perfil = btn.dataset.demo;
-        selecionarPerfil(perfil);
-        document.getElementById("loginSenha").value = "kennedy123";
-        document.getElementById("loginSenha").focus();
-      });
-    });
-
     document.getElementById("formLogin").addEventListener("submit", (e) => {
       e.preventDefault();
       const email = document.getElementById("loginEmail").value.trim().toLowerCase();
@@ -231,7 +228,7 @@ const App = {
   },
 
   salvar(chave) {
-    localStorage.setItem("sgk2_" + chave, JSON.stringify(this.state[chave]));
+    this.lsSet("sgk2_" + chave, JSON.stringify(this.state[chave]));
     // Sempre que o estoque muda, itens vencidos viram registro de desperdício
     if (chave === "estoque") this.registrarVencidosComoDesperdicio();
   },
@@ -399,7 +396,7 @@ const App = {
     document.getElementById("userAvatar").textContent = avatares[this.role] || avatares.tia;
     const btnNovoAviso = document.getElementById("btnNovoAviso");
     if (btnNovoAviso) btnNovoAviso.style.display = diretora ? "" : "none";
-    localStorage.setItem("sgk2_role", this.role);
+    this.lsSet("sgk2_role", this.role);
     if (!diretora && ["aprovacoes", "relatorio"].includes(this.secao)) this.irPara("inicio");
     else this.renderizar();
   },
@@ -1441,7 +1438,7 @@ const App = {
     });
 
     // Tema (escuro por padrão)
-    const temaSalvo = localStorage.getItem("sgk2_tema") || "escuro";
+    const temaSalvo = this.lsGet("sgk2_tema") || "escuro";
     document.body.classList.toggle("claro", temaSalvo === "claro");
     const metaTema = document.querySelector('meta[name="theme-color"]');
     const aplicarMetaTema = (claro) => {
@@ -1452,7 +1449,7 @@ const App = {
     btnTema.textContent = temaSalvo === "claro" ? "🌙" : "☀️";
     btnTema.onclick = () => {
       const claro = document.body.classList.toggle("claro");
-      localStorage.setItem("sgk2_tema", claro ? "claro" : "escuro");
+      this.lsSet("sgk2_tema", claro ? "claro" : "escuro");
       btnTema.textContent = claro ? "🌙" : "☀️";
       aplicarMetaTema(claro);
     };
@@ -1500,6 +1497,11 @@ const App = {
     document.getElementById("btnImprimirCardapio").onclick = () => window.print();
     document.getElementById("btnMontarCardapio").onclick = () => this.formCardapio();
     document.getElementById("btnHistorico").onclick = () => this.abrirHistorico();
+
+    // Botão voltar ao topo
+    const btnTopo = document.getElementById("btnTopo");
+    window.addEventListener("scroll", () => btnTopo.classList.toggle("visivel", window.scrollY > 300), { passive: true });
+    btnTopo.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
     document.getElementById("semanaTabs").addEventListener("click", (e) => {
       const b = e.target.closest("[data-dia]");
       if (b) { this.diaCardapio = Number(b.dataset.dia); this.renderCardapio(); }
@@ -1645,14 +1647,14 @@ const App = {
       const i = Number(c.dataset.check);
       if (c.checked && !this.checklist.includes(i)) this.checklist.push(i);
       if (!c.checked) this.checklist = this.checklist.filter(x => x !== i);
-      localStorage.setItem("sgk2_checklist", JSON.stringify(this.checklist));
+      this.lsSet("sgk2_checklist", JSON.stringify(this.checklist));
       c.closest(".check-item").classList.toggle("concluido", c.checked);
       this.atualizarProgresso(8);
       if (this.checklist.length === 8) this.registrarChecklist();
     });
     document.getElementById("resetChecklist").onclick = () => {
       this.checklist = [];
-      localStorage.setItem("sgk2_checklist", "[]");
+      this.lsSet("sgk2_checklist", "[]");
       this.renderHigiene();
       this.toast("Checklist reiniciado.", "info");
     };

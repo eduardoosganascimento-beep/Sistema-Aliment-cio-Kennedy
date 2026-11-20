@@ -86,7 +86,10 @@ automaticamente: apenas a exclusão explícita remove um item cadastrado.
 | 📚 Pedagoga | `pedagoga@kennedy.escola.br` | `kennedy123` |
 | 🎓 Diretora Pedagoga | `diretora@kennedy.escola.br` | `kennedy123` |
 
-Também é possível criar novas contas na aba **Criar conta** da tela de login.
+A tela de login **não mostra mais o acesso rápido** com as contas de teste: ao
+escolher um perfil, o e-mail é preenchido automaticamente e a senha deve ser
+digitada. Também é possível criar novas contas na aba **Criar conta**. Contas
+criadas ficam salvas e não são apagadas automaticamente.
 
 ---
 
