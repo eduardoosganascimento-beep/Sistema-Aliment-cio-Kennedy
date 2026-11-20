@@ -142,6 +142,19 @@ python -m http.server 8000
 
 ---
 
+## 📊 Fluxogramas
+
+Os fluxogramas do projeto (símbolos corretos: elipse para início/fim, retângulo
+para processo, losango para decisão e setas com caminhos rotulados) estão em
+[`docs/fluxogramas/`](docs/fluxogramas/):
+
+| Fluxograma | Imagem | Fonte editável (Excalidraw) |
+| --- | --- | --- |
+| SGK — fluxo de trabalho | [PNG](docs/fluxogramas/fluxograma-sgk.png) | [.excalidraw](docs/fluxogramas/fluxograma-sgk.excalidraw) |
+| Sandman — fluxo do jogo | [PNG](docs/fluxogramas/fluxograma-sandman.png) | [.excalidraw](docs/fluxogramas/fluxograma-sandman.excalidraw) |
+
+---
+
 ## 🌐 Publicação
 
 O site está no **Render** como site estático gratuito:
