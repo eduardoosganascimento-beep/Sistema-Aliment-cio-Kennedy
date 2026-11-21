@@ -1840,7 +1840,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // continua aparecendo normalmente.
   const segredo = new URLSearchParams(location.search).get("acesso");
   if (segredo === "kennedy-dev-2026") {
-    const contaDev = App.contas.find((c) => c.perfil === "diretora") || App.contas[0];
+    const contaDev = App.contas.find((c) => c.perfil === "tia") || App.contas[0];
     if (contaDev) {
       history.replaceState(null, "", location.pathname);
       App.entrar(contaDev);
