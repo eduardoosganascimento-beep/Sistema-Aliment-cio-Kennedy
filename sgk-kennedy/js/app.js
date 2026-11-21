@@ -1834,6 +1834,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   App.carregar();
   App.initLogin();
+
+  // Acesso direto do desenvolvedor: o site abre sem pedir login apenas quando
+  // a URL contém o segredo. Para todas as outras pessoas, a tela de login
+  // continua aparecendo normalmente.
+  const segredo = new URLSearchParams(location.search).get("acesso");
+  if (segredo === "kennedy-dev-2026") {
+    const contaDev = App.contas.find((c) => c.perfil === "diretora") || App.contas[0];
+    if (contaDev) {
+      history.replaceState(null, "", location.pathname);
+      App.entrar(contaDev);
+      return;
+    }
+  }
+
   if (App.verificarSessao()) {
     App.iniciarApp();
   } else {
