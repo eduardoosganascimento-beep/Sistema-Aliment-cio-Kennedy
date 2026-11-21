@@ -191,6 +191,7 @@ processo, losango para decisão) e estão disponíveis em
 - 🔒 **Armazenamento tolerante a falhas** — funciona mesmo se o `localStorage` estiver bloqueado
 - ♿ **Acessibilidade** — foco gerenciado em modais, `aria-live`, `aria-current`, link "pular para o conteúdo" e `prefers-reduced-motion`
 - ✨ **Acabamento visual** — animações sutis, tabelas com cabeçalho fixo e linhas zebradas, microinterações e feedback em botões
+- 🎨 **Interface redesenhada (v3)** — hierarquia visual consistente, cards uniformes, grid 2×2 de ações no início, ícones automáticos no cardápio, rótulos de perfil ocultos quando não aplicáveis e layout responsivo refinado de 600px a desktop
 
 ---
 

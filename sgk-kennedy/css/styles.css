@@ -1638,3 +1638,97 @@ body.claro .hero h2 span { text-shadow: 0 0 24px rgba(37,99,235,.25); }
 body.claro .meta-top strong { color: #0f172a; }
 
 @media (max-width: 700px) { .metas-grid { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   DESIGN SYSTEM v3 — padronização visual e hierarquia
+   ============================================================ */
+:root {
+  --esp-1: 6px; --esp-2: 10px; --esp-3: 14px; --esp-4: 20px; --esp-5: 28px;
+  --raio-sm: 12px; --raio-md: 16px; --raio-lg: 22px;
+}
+
+/* Tipografia consistente */
+body { font-size: 14.5px; line-height: 1.55; }
+h1, h2, h3, h4 { letter-spacing: -.6px; }
+.content { padding: 26px 30px 50px; }
+.page-intro { margin-bottom: 22px; }
+.page-intro h2 { font-size: 25px; }
+
+/* Topbar mais respirável e hierárquica */
+.topbar { padding: 11px 26px; gap: 14px; }
+.topbar-title h1 { font-size: 20px; font-weight: 800; }
+.icon-btn { width: 40px; height: 40px; }
+
+/* Herói com melhor distribuição e botões alinhados */
+.hero { padding: 28px 32px; border-radius: var(--raio-lg); }
+.hero h2 { font-size: 34px; white-space: nowrap; }
+.hero p { font-size: 13.5px; max-width: 660px; line-height: 1.6; }
+.hero-text { max-width: 680px; }
+.hero-actions { margin-top: 20px; gap: 8px; }
+.hero-actions .btn { padding: 10px 14px; font-size: 12px; white-space: nowrap; }
+.hero-date { font-size: 11px; font-weight: 700; }
+
+/* Grade de estatísticas uniforme */
+.stats-grid { gap: 14px; margin: 24px 0; }
+.stat-card { padding: 17px 18px; border-radius: var(--raio-md); min-height: 94px; }
+.stat-icon { width: 46px; height: 46px; flex-basis: 46px; border-radius: 13px; }
+.stat-info span { font-size: 9.5px; letter-spacing: .9px; }
+.stat-info strong { font-size: 24px; }
+
+/* Atalhos com altura uniforme */
+.quick-grid { gap: 14px; }
+.quick-card { padding: 18px; border-radius: var(--raio-md); min-height: 150px; }
+.quick-card strong { font-size: 15px; }
+.quick-card > span:nth-of-type(2) { font-size: 11.5px; min-height: 42px; line-height: 1.5; }
+
+/* Painéis mais arejados */
+.panel { border-radius: var(--raio-md); }
+.panel-head { padding: 14px 18px; }
+.panel-head h3 { font-size: 14.5px; }
+.mini-list { padding: 6px 18px 14px; }
+.mini-item { padding: 11px 0; }
+
+/* Tabelas mais legíveis */
+.tabela th, .tabela td { padding: 11px 13px; }
+.tabela-wrap { border-radius: 12px; }
+
+/* Seções com respiro */
+.section-heading { margin: 26px 0 14px; }
+
+/* Tablet: two-col vira 1 coluna antes e mantém tudo alinhado */
+@media (max-width: 1180px) {
+  .hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hero-actions .btn { width: 100%; justify-content: center; text-align: center; }
+}
+@media (max-width: 980px) {
+  .content { padding: 22px 20px 40px; }
+  .hero { padding: 26px 24px; }
+  .hero h2 { font-size: 31px; white-space: normal; }
+  .hero-actions { gap: 8px; }
+  .hero-actions .btn { flex: 1 1 auto; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .quick-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 820px) {
+  .hero-actions .btn { min-width: 0; padding: 10px 8px; font-size: 11.5px; }
+  .hero p { font-size: 13px; }
+  .stats-grid { gap: 10px; }
+  .stat-card { padding: 14px; gap: 11px; min-height: 86px; }
+  .stat-icon { width: 40px; height: 40px; flex-basis: 40px; font-size: 18px; }
+  .stat-info strong { font-size: 21px; }
+  .stat-info span { font-size: 8.5px; }
+  .quick-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .quick-card { min-height: 140px; padding: 14px; }
+  .quick-card .qc-icon { width: 36px; height: 36px; font-size: 18px; }
+  .quick-card strong { font-size: 13px; }
+  .quick-card > span:nth-of-type(2) { font-size: 10.5px; min-height: 46px; }
+  .content { padding: 18px 14px 34px; }
+  .page-intro h2 { font-size: 22px; }
+}
+
+@media (max-width: 520px) {
+  .stats-grid, .quick-grid { grid-template-columns: 1fr 1fr; }
+  .hero-actions { grid-template-columns: 1fr; }
+  .hero-actions .btn { width: 100%; min-width: 0; }
+}

@@ -533,7 +533,7 @@ const App = {
     const rotulos = { tia: "Cozinheira", pedagoga: "Pedagoga", diretora: "Diretora Pedagoga" };
     const avatares = { tia: "👩‍🍳", pedagoga: "📚", diretora: "🎓" };
     const rotulo = rotulos[this.role] || rotulos.tia;
-    document.querySelectorAll(".nav-diretora").forEach((n) => (n.style.display = diretora ? "" : "none"));
+    document.querySelectorAll(".nav-diretora, .diretora-label").forEach((n) => (n.style.display = diretora ? "" : "none"));
     const nome = this.usuario?.nome || rotulo;
     document.getElementById("userName").textContent = nome;
     document.getElementById("userRole").textContent = rotulo;
