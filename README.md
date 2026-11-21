@@ -1,24 +1,71 @@
+<div align="center">
+
 # 🍽️ SGK — Sistema Gerenciador Culinário Kennedy
 
-Sistema de gestão da cozinha escolar: receitas passo a passo, cardápio semanal,
-controle de estoque com quantidade e preço, higiene, avisos, aprovação de
-receitas, relatório de desperdício e histórico de alterações.
+**Gestão inteligente da cozinha escolar**, direto no navegador.
 
-[**👉 ABRIR O SITE SGK 👈**](https://sgk-kennedy.onrender.com)
+[![Abrir o site](https://img.shields.io/badge/🌐-Abrir%20o%20SITE-2563eb?style=for-the-badge)](https://sgk-kennedy.onrender.com)
+[![Deploy](https://img.shields.io/badge/deploy-Render-6366f1?style=for-the-badge)](https://sgk-kennedy.onrender.com)
+[![Versão](https://img.shields.io/badge/versão-2.2-16a34a?style=for-the-badge)](#)
+[![Licença](https://img.shields.io/badge/licença-Uso%20escolar-f59e0b?style=for-the-badge)](#licença)
 
-[![Deploy no Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/eduardoosganascimento-beep/Sistema-Aliment-cio-Kennedy)
+[👉 **ABRIR O SISTEMA SGK** 👈](https://sgk-kennedy.onrender.com)
+
+</div>
+
+---
+
+## 📌 Sobre o projeto
+
+O **SGK** é um sistema de gestão para a cozinha da escola Kennedy. Reúne em um
+só lugar as rotinas diárias: receitas passo a passo, cardápio semanal, controle
+de estoque com preço e validade, checklist de higiene, avisos, aprovação de
+receitas e relatório de desperdício.
+
+> **Feito com carinho para quem cuida da alimentação na escola.** 💙
 
 ---
 
 ## 📑 Índice
 
-- [Perfis de acesso](#-perfis-de-acesso)
-- [Funcionalidades](#-funcionalidades)
-- [Histórico de alterações](#-histórico-de-alterações)
-- [Acesso de teste](#-acesso-de-teste)
-- [Estrutura do projeto](#-estrutura-do-projeto)
-- [Rodar localmente](#-rodar-localmente)
-- [Publicação](#-publicação)
+| Seção | Conteúdo |
+| --- | --- |
+| [✨ Funcionalidades](#-funcionalidades) | O que o sistema faz |
+| [👥 Perfis de acesso](#-perfis-de-acesso) | Quem faz o quê |
+| [🔐 Acesso de teste](#-acesso-de-teste) | Contas para experimentar |
+| [🚀 Como usar](#-como-usar) | Primeiros passos |
+| [🛠️ Tecnologias](#️-tecnologias) | Stack do projeto |
+| [📁 Estrutura](#-estrutura-do-projeto) | Arquivos e pastas |
+| [📊 Fluxogramas](#-fluxogramas) | Diagramas do sistema e do jogo |
+| [🔒 Segurança](#-segurança-e-qualidade) | Boas práticas adotadas |
+| [💻 Rodar localmente](#-rodar-localmente) | Executar na sua máquina |
+| [🌐 Publicação](#-publicação) | Deploy no Render |
+
+---
+
+## ✨ Funcionalidades
+
+<div align="center">
+
+| 📖 Receitas | 📅 Cardápio | 📦 Estoque | 🧼 Higiene |
+| :---: | :---: | :---: | :---: |
+| Mais de 1.000 receitas, com tempo de preparo, ingredientes, modo de preparo, vídeos e dicas de higiene | Montado pelas tias, com café, almoço, lanche e sobremesa | Quantidade, preço, validade e alertas de reposição e vencimento | Checklist diário das tias com comprovante para pedagoga e diretora |
+
+| 📊 Relatório | 🔔 Avisos | ✅ Aprovação | 📝 Histórico |
+| :---: | :---: | :---: | :---: |
+| Desperdício mensal com gráficos, prejuízo estimado, sugestões e exportação CSV | Comunicações da direção para a equipe | Receitas enviadas pelas tias passam pela direção | Toda alteração registra quem fez, o quê e quando |
+
+</div>
+
+### Destaques
+
+- 🥚🐟 Categorias próprias de **ovos** e **peixes**, com vídeos de segurança alimentar
+- 🚫 Itens com validade vencida viram **desperdício automaticamente** (sem duplicatas)
+- 💾 **Backup e restauração** completa dos dados em JSON pelo rodapé
+- ⚡ Buscas com **debounce** — fluidas mesmo com mais de mil receitas
+- 🎨 Tema **Obsidian Blue** (preto e azul), com alternância para tema claro
+- 📱 Interface responsiva com navegação inferior no celular
+- ♿ Acessibilidade: navegação por teclado, foco gerenciado e rótulos em todos os controles
 
 ---
 
@@ -26,71 +73,15 @@ receitas, relatório de desperdício e histórico de alterações.
 
 | Perfil | Responsabilidades |
 | --- | --- |
-| 👩‍🍳 **Cozinheira (tia)** | Monta o cardápio, faz o checklist diário de higiene, cadastra alimentos e envia receitas para aprovação |
+| 👩‍🍳 **Cozinheira (tia)** | Monta o cardápio, faz o checklist diário, cadastra alimentos e envia receitas para aprovação |
 | 📚 **Pedagoga** | Consulta receitas/cardápio/higiene, cadastra alimentos e acompanha os comprovantes da cozinha |
 | 🎓 **Diretora Pedagoga** | Publica avisos, aprova receitas, acompanha o relatório de desperdício e vê os comprovantes |
 
-> ⚠️ Os dados ficam no `localStorage` do navegador. Não há servidor nem banco de
-> dados: o comprovante de higiene e o histórico aparecem no **mesmo
-> navegador/dispositivo** usado pela tia. O login é demonstrativo (feito no
-> cliente); para uso real com várias pessoas e dispositivos, seria necessário
-> um backend com banco de dados, autenticação e controle de acesso.
-
----
-
-## ✨ Funcionalidades
-
-### Receitas
-- 📖 Mais de 1.000 receitas escolares para ~10 porções, em categorias com ícones e ordem fixa
-- 🥚🐟 Categorias próprias de **ovos** e **peixes** (6 receitas cada), com vídeos de segurança e dicas de higiene
-- ⏱️ Cartões mostram apenas o tempo de preparo, com texto explicativo centralizado
-- 🎥 Vídeos do YouTube dentro de cada receita (a seção separada saiu do menu)
-- 🔍 Busca por nome, descrição e ingredientes; filtros por categoria
-- ➕ Receitas cadastradas ficam salvas e **só são removidas se a pessoa excluir**
-
-### Cardápio e cozinha
-- 📅 Cardápio semanal montado pelas **tias** (adicionar, editar e remover dias)
-- 🧼 Checklist diário de higiene: ao concluir as 8 rotinas, gera comprovante com nome, data e hora para pedagogas e diretoras
-- 📦 Estoque com quantidade, preço unitário, validade e quantidade mínima
-- 🚫 Itens com validade vencida entram **automaticamente** no relatório como desperdício (quantidade × preço, sem duplicatas)
-- ⚠️ Alertas de estoque baixo e alimentos vencidos
-
-### Gestão
-- 🔔 Avisos da direção para a equipe
-- ✅ Aprovação de receitas enviadas pelas cozinheiras
-- 📊 Relatório mensal de desperdício com gráficos, prejuízo estimado, sugestões e exportação CSV
-- 🎨 Tema preto e azul (Obsidian Blue), com opção de tema claro
-- 📱 Navegação inferior no celular e interface responsiva
-
-### Segurança e qualidade
-- 🛡️ **Content Security Policy (CSP)**: só scripts e recursos locais (exceto fontes do Google); sem scripts inline, `eval` ou frames
-- 🔗 **Links do YouTube validados**: apenas IDs válidos de 11 caracteres geram links
-- 📄 **CSV protegido contra injeção de fórmulas** em planilhas
-- ✍️ **Todo conteúdo vindo de formulários é escapado** antes de ir para o HTML
-- ⚠️ **Tratamento global de erros**: falhas inesperadas avisam o usuário em vez de deixar a tela em branco
-- ♿ **Acessibilidade**: foco automático nos modais, `aria-live` nos avisos, navegação por teclado e suporte a `prefers-reduced-motion`
-- 🔒 **Armazenamento tolerante a falhas**: funciona mesmo se o navegador bloquear o `localStorage` (com aviso ao usuário)
-- ♿ **Acessibilidade reforçada**: link "pular para o conteúdo", rótulos em campos e botões de ícone, `aria-current` na navegação, abas com `aria-selected` e foco preso dentro dos modais
-- 🎯 **Detalhes de acabamento**: feedback visual em botões e filtros, barras de progresso com brilho, ícones animados nos estados vazios, limite de avisos na tela e textos corrigidos sobre quem pode gerenciar o estoque
-- 💾 **Backup e restauração**: exporte/importe todos os dados em JSON pelo rodapé (`Backup / Restaurar`)
-- ⚡ **Buscas com debounce**: navegação fluida mesmo com mais de mil receitas
-- ✨ **Acabamento visual**: animações de entrada, modais com vidro fosco, tabelas com cabeçalho fixo e linhas zebradas, microinterações nos botões e cartões
-
----
-
-## 📝 Histórico de alterações
-
-Toda alteração registra **quem fez, o que foi feito e quando**:
-
-- Cadastro/edição/remoção de receitas, alimentos e dias do cardápio
-- Aprovação e rejeição de receitas
-- Ajuste de quantidade no estoque e remoção de itens
-- Conclusão do checklist de higiene
-- Publicação/remoção de avisos e registro/remoção de desperdício
-
-O painel **"Atividade recente"** aparece na tela inicial e o botão
-**"Ver histórico completo"** abre a lista completa. Nada é apagado
-automaticamente: apenas a exclusão explícita remove um item cadastrado.
+> ⚠️ **Importante:** os dados ficam no `localStorage` do navegador. Não há
+> servidor nem banco de dados — o comprovante de higiene e o histórico aparecem
+> no **mesmo navegador/dispositivo** usado pela tia. O login é demonstrativo
+> (feito no cliente). Para uso real com várias pessoas e dispositivos, seria
+> necessário um backend com autenticação e banco de dados.
 
 ---
 
@@ -102,10 +93,39 @@ automaticamente: apenas a exclusão explícita remove um item cadastrado.
 | 📚 Pedagoga | `pedagoga@kennedy.escola.br` | `kennedy123` |
 | 🎓 Diretora Pedagoga | `diretora@kennedy.escola.br` | `kennedy123` |
 
-A tela de login **não mostra mais o acesso rápido** com as contas de teste: ao
-escolher um perfil, o e-mail é preenchido automaticamente e a senha deve ser
-digitada. Também é possível criar novas contas na aba **Criar conta**. Contas
-criadas ficam salvas e não são apagadas automaticamente.
+Ao escolher um perfil na tela de login, o e-mail é preenchido
+automaticamente — digite apenas a senha. Também é possível criar novas contas
+na aba **Criar conta**. Contas criadas ficam salvas e nunca são apagadas
+automaticamente.
+
+---
+
+## 🚀 Como usar
+
+1. Acesse o [SGK](https://sgk-kennedy.onrender.com)
+2. Escolha seu perfil e entre com uma das contas de teste
+3. Na **tela inicial**, veja atividade recente, avisos e atalhos
+4. Use o **menu lateral** para navegar entre as seções
+5. No rodapé, use **💾 Backup / Restaurar** para guardar seus dados
+
+---
+
+## 🛠️ Tecnologias
+
+<div align="center">
+
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Render](https://img.shields.io/badge/Render-6366F1?style=flat-square&logo=render&logoColor=white)
+![Excalidraw](https://img.shields.io/badge/Excalidraw-6965DB?style=flat-square&logo=excalidraw&logoColor=white)
+
+</div>
+
+- **Frontend:** HTML5 semântico, CSS3 (variáveis, grid, animações) e JavaScript vanilla
+- **Persistência:** `localStorage` do navegador + backup/restore em JSON
+- **Deploy:** Render (site estático)
+- **Documentação:** README e fluxogramas em Excalidraw/draw.io
 
 ---
 
@@ -113,57 +133,99 @@ criadas ficam salvas e não são apagadas automaticamente.
 
 ```
 Sistema-Aliment-cio-Kennedy/
-├── sgk-kennedy/
-│   ├── index.html                  # Estrutura e seções do sistema
-│   ├── 404.html                    # Página de erro personalizada
-│   ├── favicon.svg                 # Ícone da aba
-│   ├── robots.txt / sitemap.xml    # Regras e mapa para buscadores
-│   ├── css/styles.css              # Tema, componentes e responsividade
-│   └── js/
-│       ├── data.js                 # Dados iniciais (cardápio, receitas base etc.)
-│       ├── receitas-extras.js      # Catálogo ampliado (1.000+ receitas)
-│       ├── receitas-ovos-peixes.js # Receitas de ovos e peixes
-│       ├── videos-data.js          # Vídeos usados dentro das receitas
-│       └── app.js                  # Lógica, perfis, sessão e interações
-├── render.yaml                     # Blueprint de deploy no Render
-├── .gitignore
-└── README.md
-```
-
----
-
-## 💻 Rodar localmente
-
-Abra `sgk-kennedy/index.html` no navegador ou use um servidor estático:
-
-```bash
-cd sgk-kennedy
-python -m http.server 8000
-# acesse http://localhost:8000
+├── 📄 README.md                    # Esta documentação
+├── ⚙️ render.yaml                  # Blueprint de deploy no Render
+├── 📂 .gitignore
+├── 📂 docs/
+│   └── 📂 fluxogramas/             # Diagramas do sistema e do jogo
+│       ├── 🖼️ fluxograma-sgk.png
+│       ├── 🖼️ fluxograma-sandman.png
+│       ├── 📐 fluxograma-sgk.excalidraw
+│       ├── 📐 fluxograma-sandman.excalidraw
+│       └── 📐 fluxogramas-sgk-sandman.drawio
+└── 📂 sgk-kennedy/                 # Site (publicado no Render)
+    ├── 📄 index.html               # Estrutura e seções
+    ├── 📄 404.html                 # Página de erro personalizada
+    ├── 📄 favicon.svg              # Ícone da aba
+    ├── 📄 robots.txt               # Regras para buscadores
+    ├── 📄 sitemap.xml              # Mapa do site
+    ├── 📂 css/
+    │   └── styles.css              # Tema, componentes e responsividade
+    └── 📂 js/
+        ├── data.js                 # Dados iniciais (cardápio, receitas base)
+        ├── receitas-extras.js      # Catálogo ampliado (1.000+ receitas)
+        ├── receitas-ovos-peixes.js # Receitas de ovos e peixes
+        ├── videos-data.js          # Vídeos usados dentro das receitas
+        └── app.js                  # Lógica, perfis, sessão e interações
 ```
 
 ---
 
 ## 📊 Fluxogramas
 
-Os fluxogramas do projeto (símbolos corretos: elipse para início/fim, retângulo
-para processo, losango para decisão e setas com caminhos rotulados) estão em
-[`docs/fluxogramas/`](docs/fluxogramas/):
+### SGK — fluxo de trabalho do sistema
 
-| Fluxograma | Imagem | Fonte editável (Excalidraw) |
-| --- | --- | --- |
-| SGK — fluxo de trabalho | [PNG](docs/fluxogramas/fluxograma-sgk.png) | [.excalidraw](docs/fluxogramas/fluxograma-sgk.excalidraw) |
-| Sandman — fluxo do jogo | [PNG](docs/fluxogramas/fluxograma-sandman.png) | [.excalidraw](docs/fluxogramas/fluxograma-sandman.excalidraw) |
+![Fluxograma do SGK](docs/fluxogramas/fluxograma-sgk.png)
+
+### Sandman — fluxo do jogo (Game.Cesar)
+
+![Fluxograma do Sandman](docs/fluxogramas/fluxograma-sandman.png)
+
+Os diagramas usam os símbolos corretos (elipse para início/fim, retângulo para
+processo, losango para decisão) e estão disponíveis em
+[`docs/fluxogramas/`](docs/fluxogramas/), nos formatos PNG, Excalidraw e draw.io.
+
+---
+
+## 🔒 Segurança e qualidade
+
+- 🛡️ **Content Security Policy (CSP)** — bloqueia scripts inline, `eval` e origens não autorizadas
+- 🔗 **URLs do YouTube validadas** — apenas IDs válidos de 11 caracteres
+- 📄 **CSV protegido** contra injeção de fórmulas em planilhas
+- ✍️ **Escape de conteúdo** de formulários antes de inserir no HTML
+- ⚠️ **Tratamento global de erros** — falhas avisam o usuário sem quebrar a tela
+- 🔒 **Armazenamento tolerante a falhas** — funciona mesmo se o `localStorage` estiver bloqueado
+- ♿ **Acessibilidade** — foco gerenciado em modais, `aria-live`, `aria-current`, link "pular para o conteúdo" e `prefers-reduced-motion`
+- ✨ **Acabamento visual** — animações sutis, tabelas com cabeçalho fixo e linhas zebradas, microinterações e feedback em botões
+
+---
+
+## 💻 Rodar localmente
+
+```bash
+# clone o repositório
+git clone https://github.com/eduardoosganascimento-beep/Sistema-Aliment-cio-Kennedy.git
+cd Sistema-Aliment-cio-Kennedy/sgk-kennedy
+
+# inicie um servidor estático
+python -m http.server 8000
+# acesse http://localhost:8000
+```
+
+Também é possível abrir `sgk-kennedy/index.html` diretamente no navegador.
 
 ---
 
 ## 🌐 Publicação
 
-O site está no **Render** como site estático gratuito:
-https://sgk-kennedy.onrender.com
+O site está publicado no **Render** como site estático gratuito:
+
+🔗 **https://sgk-kennedy.onrender.com**
 
 O arquivo `render.yaml` permite recriar o serviço pelo botão **Deploy no Render**.
-O serviço está configurado com Auto-Deploy "On Commit", mas historicamente os
-deploys foram feitos de forma manual pelo painel do Render
-(`Manual Deploy → Deploy latest commit`). Se uma alteração não aparecer no ar,
-verifique o último deploy no painel e dispare um novo.
+Se uma alteração não aparecer no ar, dispare um deploy manual pelo painel do
+Render (`Manual Deploy → Deploy latest commit`).
+
+---
+
+## 📄 Licença
+
+Projeto pessoal em desenvolvimento. Todos os direitos reservados.
+
+---
+
+<div align="center">
+
+💙 **Feito com carinho para apoiar quem cuida da alimentação na escola.**
+
+</div>
