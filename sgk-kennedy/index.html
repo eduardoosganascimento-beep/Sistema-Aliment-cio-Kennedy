@@ -30,7 +30,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=23" />
+  <link rel="stylesheet" href="css/styles.css?v=24" />
 </head>
 <body>
   <noscript>
@@ -233,6 +233,7 @@
               <button class="btn btn-primary" data-go="receitas">📖 Ver Receitas</button>
               <button class="btn btn-outline" data-go="cardapio">📅 Cardápio da Semana</button>
               <button class="btn btn-ghost" id="btnCadastrarAlimento">➕ Cadastrar alimento</button>
+              <button class="btn btn-outline so-tia" id="btnDesperdicioRapido">⚖️ Registrar desperdício do dia</button>
             </div>
           </div>
           <div class="hero-art" aria-hidden="true">
@@ -488,8 +489,13 @@
             <h2>📊 Relatório de Desperdício</h2>
             <p id="relatorioSubtitulo">Acompanhamento mensal de perdas e sugestões de redução.</p>
           </div>
-          <button class="btn btn-primary" id="btnNovoDesperdicio">➕ Registrar desperdício</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="btnNovoDesperdicio">⚖️ Registrar desperdício do dia</button>
+            <button class="btn btn-outline" id="btnMetaDesperdicio">🎯 Definir meta</button>
+          </div>
         </div>
+
+        <div class="panel" id="painelMetas" style="margin-bottom: 18px"></div>
 
         <div class="stats-grid" id="relatorioStats"></div>
 
@@ -535,7 +541,7 @@
       <span>© <span id="anoAtual"></span> SGK — Sistema Gerenciador Culinário Kennedy</span>
       <span class="footer-acoes">
         <button class="link-btn" id="btnBackup">💾 Backup / Restaurar</button>
-        <span class="footer-versao">v2.5 · build <span id="buildNum">23</span></span>
+        <span class="footer-versao">v2.6 · build <span id="buildNum">24</span></span>
       </span>
       <span>💙 Feito para apoiar quem cuida da alimentação na escola</span>
     </footer>
@@ -568,10 +574,10 @@
   <!-- ===== Toast ===== -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="js/data.js?v=23"></script>
-  <script src="js/videos-data.js?v=23"></script>
-  <script src="js/receitas-extras.js?v=23"></script>
-  <script src="js/receitas-ovos-peixes.js?v=23"></script>
-  <script src="js/app.js?v=23"></script>
+  <script src="js/data.js?v=24"></script>
+  <script src="js/videos-data.js?v=24"></script>
+  <script src="js/receitas-extras.js?v=24"></script>
+  <script src="js/receitas-ovos-peixes.js?v=24"></script>
+  <script src="js/app.js?v=24"></script>
 </body>
 </html>

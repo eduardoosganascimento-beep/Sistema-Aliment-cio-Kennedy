@@ -59,6 +59,10 @@ receitas e relatório de desperdício.
 
 ### Destaques
 
+- ⚖️ **Desperdício pesado pelas cozinheiras**: registro diário com peso/quantidade, o que foi desperdiçado, motivo e prejuízo calculado pelo preço do estoque
+- 🎯 **Metas de redução** semanal e mensal em kg, com barra de progresso e aviso quando a meta é ultrapassada
+- 💡 **Sugestões inteligentes** baseadas nos dados reais (motivo principal, alimento mais perdido e distância da meta)
+- 🍚 **Ícones automáticos no cardápio**: os emojis mudam conforme os alimentos escritos em cada refeição (arroz 🍚, frango 🍗, peixe 🐟, banana 🍌, bolo 🍰 e muitos outros)
 - 🥚🐟 Categorias próprias de **ovos** e **peixes**, com vídeos de segurança alimentar
 - 🚫 Itens com validade vencida viram **desperdício automaticamente** (sem duplicatas)
 - 💾 **Backup e restauração** completa dos dados em JSON pelo rodapé

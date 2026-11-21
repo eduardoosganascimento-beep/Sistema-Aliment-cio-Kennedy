@@ -5,6 +5,73 @@
 
 const SGK_RECEITAS_VERSAO = "9";
 
+// Dicionário de ícones de comida — usado para identificar automaticamente
+// o alimento de cada refeição no cardápio.
+const SGK_EMOJIS_COMIDA = [
+  [/nugget|kroket| croquete/i, "🍗"],
+  [/hamb.rguer|burger/i, "🍔"],
+  [/pizza/i, "🍕"],
+  [/sandu.ch|sandwich|salgado|pastel|empado|escondidinho|torta salgada/i, "🥪"],
+  [/coxinha|bolinho|frango|galinha|peito de frango/i, "🍗"],
+  [/estrogonofe|curry|carne|bovina|churrasco|alcatra|ac.m|costela/i, "🥩"],
+  [/bacon|portugu.sa|ling.i.a|salsicha/i, "🥓"],
+  [/camar.o|fruto do mar|marisco/i, "🦐"],
+  [/peixe|pescado|til.pia|salm.o|bacalhau|tubar.o/i, "🐟"],
+  [/ovo|ovos|omelete|muffin de ovo/i, "🥚"],
+  [/gr.o de bico|lentilha|soja|feij.o/i, "🫘"],
+  [/macarr.o|massa|espaguete|laneja|ravi.li/i, "🍝"],
+  [/arroz|risoto/i, "🍚"],
+  [/batata|mandioca|macaxeira|inhame|batata.doce|car.do/i, "🥔"],
+  [/milho|canjica|curau|pipoca/i, "🌽"],
+  [/farinha|farofa|cuscuz|polenta|tapioca/i, "🥣"],
+  [/sopa|caldo|ensopado|canja|lawr/i, "🍲"],
+  [/br.colis|couve.flor|legumes|verdura|espinafre|abobrinha|pepino|berinjela|piment.o/i, "🥦"],
+  [/salada|alface|r.cula|rabanete/i, "🥗"],
+  [/tomate/i, "🍅"],
+  [/cenoura/i, "🥕"],
+  [/cebola/i, "🧅"],
+  [/alho/i, "🧄"],
+  [/couve|repolho|acelga|taioba/i, "🥬"],
+  [/abacaxi/i, "🍍"],
+  [/melancia/i, "🍉"],
+  [/mel.o/i, "🍈"],
+  [/mam.o/i, "🍈"],
+  [/manga/i, "🥭"],
+  [/laranja|tangerina|mandarim/i, "🍊"],
+  [/lim.o/i, "🍋"],
+  [/banana/i, "🍌"],
+  [/ma.ã|maça/i, "🍎"],
+  [/uva/i, "🍇"],
+  [/morango/i, "🍓"],
+  [/p.ra|pera/i, "🍐"],
+  [/p.ssego/i, "🍑"],
+  [/castanha|noz|nozes|amendoim/i, "🌰"],
+  [/granola|aveia|mingau|papa| cereal/i, "🥣"],
+  [/iogurte|requeij.o|creme de leite|leite condensado/i, "🥛"],
+  [/leite/i, "🥛"],
+  [/queijo/i, "🧀"],
+  [/manteiga|margarina/i, "🧈"],
+  [/café|cafe/i, "☕"],
+  [/ch[áa]/i, "🍵"],
+  [/suco|sumo|refresco/i, "🧃"],
+  [/refrigerante|refri|soda/i, "🥤"],
+  [/vitamina/i, "🥤"],
+  [/bolo|torta doce|biscoito|bolacha|cookie/i, "🍰"],
+  [/pudim|gelatina|manjar|quindim|doce de leite/i, "🍮"],
+  [/brigadeiro|chocolate|brownie|cacau/i, "🍫"],
+  [/sorvete|picol./i, "🍦"],
+  [/p.o integral|p.o de queijo|p.o|torrada|baguete|baguette/i, "🍞"],
+  [/mel|geleia|compota/i, "🍯"],
+  [/a.ucar|acar|doce/i, "🍬"],
+];
+
+const SGK_ICONE_PADRAO_REFEICAO = {
+  cafe: "🌅",
+  almoco: "🍽️",
+  lanche: "🥪",
+  sobremesa: "🍰",
+};
+
 const App = {
   state: {},
   role: "tia",
@@ -40,6 +107,31 @@ const App = {
       .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   },
 
+  // Detecta o ícone do alimento a partir do texto da refeição.
+  emojiParaTexto(texto) {
+    const t = String(texto || "");
+    let melhorPos = Infinity;
+    let melhorEmoji = "";
+    for (const [rex, emoji] of SGK_EMOJIS_COMIDA) {
+      const m = rex.exec(t);
+      if (m && m.index < melhorPos) {
+        melhorPos = m.index;
+        melhorEmoji = emoji;
+      }
+    }
+    return melhorEmoji;
+  },
+
+  // Ícones automáticos para as 4 refeições do dia.
+  emojisDoDia(dia) {
+    return {
+      cafe: this.emojiParaTexto(dia.cafe) || SGK_ICONE_PADRAO_REFEICAO.cafe,
+      almoco: this.emojiParaTexto(dia.almoco) || SGK_ICONE_PADRAO_REFEICAO.almoco,
+      lanche: this.emojiParaTexto(dia.lanche) || SGK_ICONE_PADRAO_REFEICAO.lanche,
+      sobremesa: this.emojiParaTexto(dia.sobremesa) || SGK_ICONE_PADRAO_REFEICAO.sobremesa,
+    };
+  },
+
   // Só aceita IDs válidos do YouTube (11 caracteres) antes de montar a URL.
   ytUrl(id) {
     const m = String(id || "").match(/^[A-Za-z0-9_-]{11}$/);
@@ -56,7 +148,7 @@ const App = {
   },
 
   carregar() {
-    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades"];
+    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades", "metas"];
     // Catálogo base + receitas ampliadas (arquivo separado para não pesar o data.js)
     const receitasBase = (SGK_DATA.receitas || []).concat(
       typeof SGK_RECEITAS_EXTRAS !== "undefined" ? SGK_RECEITAS_EXTRAS : [],
@@ -554,8 +646,10 @@ const App = {
     const tabs = document.getElementById("semanaTabs");
     tabs.innerHTML = dias.map((c) => {
       const i = this.state.cardapio.indexOf(c);
-      return `<button class="dia-tab ${i === this.diaCardapio ? "active" : ""}" data-dia="${i}">
-        <span>${c.emoji}</span> ${this.destacar(c.dia, busca)}
+      const icos = this.emojisDoDia(c);
+      const icoDia = this.emojiParaTexto(c.almoco) || this.emojiParaTexto(c.cafe) || c.emoji || "📅";
+      return `<button class="dia-tab ${i === this.diaCardapio ? "active" : ""}" data-dia="${i}" title="${icos.cafe} Café · ${icos.almoco} Almoço · ${icos.lanche} Lanche · ${icos.sobremesa} Sobremesa">
+        <span>${icoDia}</span> ${this.destacar(c.dia, busca)}
       </button>`;
     }).join("");
 
@@ -568,17 +662,19 @@ const App = {
       return;
     }
 
+    const icos = this.emojisDoDia(c);
     const ref = [
-      { ico: "🌅", cor: "bg-orange", label: "Café da manhã", txt: c.cafe },
-      { ico: "🍽️", cor: "bg-green", label: "Almoço", txt: c.almoco },
-      { ico: "🥪", cor: "bg-blue", label: "Lanche da tarde", txt: c.lanche },
-      { ico: "🍰", cor: "bg-purple", label: "Sobremesa", txt: c.sobremesa },
+      { ico: icos.cafe, cor: "bg-orange", label: "Café da manhã", txt: c.cafe },
+      { ico: icos.almoco, cor: "bg-green", label: "Almoço", txt: c.almoco },
+      { ico: icos.lanche, cor: "bg-blue", label: "Lanche da tarde", txt: c.lanche },
+      { ico: icos.sobremesa, cor: "bg-purple", label: "Sobremesa", txt: c.sobremesa },
     ];
+    const icoDia = this.emojiParaTexto(c.almoco) || this.emojiParaTexto(c.cafe) || c.emoji || "📅";
     const idxC = this.state.cardapio.indexOf(c);
     document.getElementById("cardapioDetalhe").innerHTML = `
       <div class="cardapio-dia">
         <div class="cardapio-dia-head">
-          <h3>${c.emoji} ${this.esc(c.dia)}</h3>
+          <h3>${icoDia} ${this.esc(c.dia)}</h3>
           ${this.role === "tia" ? `<div class="cardapio-acoes">
             <button class="btn btn-outline btn-sm" data-edit-cardapio="${idxC}">✏️ Editar dia</button>
             <button class="btn btn-danger btn-sm" data-del-cardapio="${idxC}">🗑️ Remover</button>
@@ -592,12 +688,17 @@ const App = {
         </div>
       </div>`;
 
-    document.getElementById("cardapioTabela").innerHTML = dias.map(dia => `
-      <tr>
-        <td class="nome-cell">${dia.emoji} ${this.destacar(dia.dia, busca)}</td>
-        <td>${this.destacar(dia.cafe, busca)}</td><td>${this.destacar(dia.almoco, busca)}</td>
-        <td>${this.destacar(dia.lanche, busca)}</td><td>${this.destacar(dia.sobremesa, busca)}</td>
-      </tr>`).join("");
+    document.getElementById("cardapioTabela").innerHTML = dias.map(dia => {
+      const ic = this.emojisDoDia(dia);
+      const icoDia = this.emojiParaTexto(dia.almoco) || this.emojiParaTexto(dia.cafe) || dia.emoji || "📅";
+      return `<tr>
+        <td class="nome-cell">${icoDia} ${this.destacar(dia.dia, busca)}</td>
+        <td>${ic.cafe} ${this.destacar(dia.cafe, busca)}</td>
+        <td>${ic.almoco} ${this.destacar(dia.almoco, busca)}</td>
+        <td>${ic.lanche} ${this.destacar(dia.lanche, busca)}</td>
+        <td>${ic.sobremesa} ${this.destacar(dia.sobremesa, busca)}</td>
+      </tr>`;
+    }).join("");
   },
 
   /* ---------- Cardápio: montar/editar (somente tias) ---------- */
@@ -608,7 +709,7 @@ const App = {
     }
     const editando = Number.isInteger(indice) && !!this.state.cardapio[indice];
     const c = editando ? this.state.cardapio[indice]
-      : { dia: "Segunda-feira", emoji: "📅", cafe: "", almoco: "", lanche: "", sobremesa: "" };
+      : { dia: "Segunda-feira", emoji: "", cafe: "", almoco: "", lanche: "", sobremesa: "" };
     const dias = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"];
 
     this.abrirModal(editando ? "✏️ Editar dia do cardápio" : "➕ Montar cardápio", `
@@ -616,20 +717,47 @@ const App = {
         <div class="form-group"><label>Dia da semana</label>
           <select id="c_dia">${dias.map(d => `<option ${c.dia === d ? "selected" : ""}>${d}</option>`).join("")}</select>
         </div>
-        <div class="form-group"><label>Emoji do dia</label><input id="c_emoji" value="${this.esc(c.emoji || "📅")}" placeholder="🍽️" /></div>
+        <div class="form-group"><label>Emoji do dia (opcional)</label><input id="c_emoji" value="${this.esc(c.emoji || "")}" placeholder="Deixe em branco = automático" /></div>
       </div>
+      <div class="icones-preview" id="c_preview"></div>
       <div class="form-group"><label>🌅 Café da manhã</label><textarea id="c_cafe" style="min-height:58px" placeholder="Ex.: Pão integral com manteiga e suco natural">${this.esc(c.cafe)}</textarea></div>
       <div class="form-group"><label>🍽️ Almoço</label><textarea id="c_almoco" style="min-height:58px" placeholder="Ex.: Arroz, feijão, frango grelhado e salada">${this.esc(c.almoco)}</textarea></div>
       <div class="form-group"><label>🥪 Lanche da tarde</label><textarea id="c_lanche" style="min-height:58px" placeholder="Ex.: Iogurte com granola">${this.esc(c.lanche)}</textarea></div>
       <div class="form-group"><label>🍰 Sobremesa</label><textarea id="c_sobremesa" style="min-height:58px" placeholder="Ex.: Fruta da estação">${this.esc(c.sobremesa)}</textarea></div>
-      <p class="hint">Somente as <strong>tias (cozinheiras)</strong> montam o cardápio. As alterações ficam salvas neste navegador.</p>
+      <p class="hint">Os ícones acima mudam automaticamente conforme os alimentos que você escrever. Somente as <strong>tias (cozinheiras)</strong> montam o cardápio.</p>
     `, `<button class="btn btn-outline" data-fechar-modal>Cancelar</button>
         <button class="btn btn-primary" id="salvarCardapio">💾 Salvar no cardápio</button>`);
 
+    const atualizarPreview = () => {
+      const dia = {
+        cafe: document.getElementById("c_cafe").value,
+        almoco: document.getElementById("c_almoco").value,
+        lanche: document.getElementById("c_lanche").value,
+        sobremesa: document.getElementById("c_sobremesa").value,
+      };
+      const ic = this.emojisDoDia(dia);
+      const el = document.getElementById("c_preview");
+      if (el) el.innerHTML = `
+        <span class="icone-chip"><b>${ic.cafe}</b> Café</span>
+        <span class="icone-chip"><b>${ic.almoco}</b> Almoço</span>
+        <span class="icone-chip"><b>${ic.lanche}</b> Lanche</span>
+        <span class="icone-chip"><b>${ic.sobremesa}</b> Sobremesa</span>`;
+    };
+    ["c_cafe", "c_almoco", "c_lanche", "c_sobremesa"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", atualizarPreview);
+    });
+    atualizarPreview();
+
     document.getElementById("salvarCardapio").onclick = () => {
+      const almocoTexto = document.getElementById("c_almoco").value;
+      const cafeTexto = document.getElementById("c_cafe").value;
       const dados = {
         dia: document.getElementById("c_dia").value,
-        emoji: document.getElementById("c_emoji").value.trim() || "📅",
+        emoji: document.getElementById("c_emoji").value.trim()
+          || this.emojiParaTexto(almocoTexto)
+          || this.emojiParaTexto(cafeTexto)
+          || "📅",
         cafe: document.getElementById("c_cafe").value.trim(),
         almoco: document.getElementById("c_almoco").value.trim(),
         lanche: document.getElementById("c_lanche").value.trim(),
@@ -1228,10 +1356,104 @@ const App = {
     });
   },
 
+  /* ---------- Desperdício: peso e metas de redução ---------- */
+  paraKg(d) {
+    const q = Number(d.qtd) || 0;
+    switch (String(d.unidade || "kg").toLowerCase()) {
+      case "g": return q / 1000;
+      case "ml": return q / 1000;
+      case "un": return q * 0.2;
+      case "pct": return q * 0.5;
+      default: return q;
+    }
+  },
+
+  kgTotal(lista) {
+    return (lista || []).reduce((s, d) => s + this.paraKg(d), 0);
+  },
+
+  desperdicioDaSemana() {
+    const hoje = new Date();
+    const inicio = new Date(hoje);
+    inicio.setDate(hoje.getDate() - ((hoje.getDay() + 6) % 7));
+    const fim = new Date(inicio);
+    fim.setDate(inicio.getDate() + 6);
+    return this.state.desperdicio.filter(d => {
+      const dt = new Date(d.data + "T00:00:00");
+      return dt >= inicio && dt <= fim;
+    });
+  },
+
+  metasAtuais() {
+    const m = (this.state.metas && this.state.metas[0]) || {};
+    return {
+      semana: Number(m.semana) || 20,
+      mes: Number(m.mes) || 80,
+    };
+  },
+
+  configurarMeta() {
+    const meta = this.metasAtuais();
+    this.abrirModal("🎯 Meta de redução de desperdício", `
+      <p class="hint">Defina o limite máximo de desperdício (em kg). O sistema acompanha o progresso na semana e no mês e sugere como reduzir.</p>
+      <div class="form-row">
+        <div class="form-group"><label>Meta semanal (kg)</label>
+          <input id="metaSemana" type="number" min="0" step="0.5" value="${meta.semana}" /></div>
+        <div class="form-group"><label>Meta mensal (kg)</label>
+          <input id="metaMes" type="number" min="0" step="1" value="${meta.mes}" /></div>
+      </div>
+      <p class="hint">Sugestão: comece com um valor alto e reduza gradualmente conforme a equipe se organiza.</p>
+    `, `<button class="btn btn-outline" data-fechar-modal>Cancelar</button>
+        <button class="btn btn-primary" id="salvarMeta">💾 Salvar meta</button>`);
+
+    document.getElementById("salvarMeta").onclick = () => {
+      const semana = Number(document.getElementById("metaSemana").value) || 0;
+      const mes = Number(document.getElementById("metaMes").value) || 0;
+      if (semana <= 0 || mes <= 0) { this.toast("Informe metas maiores que zero.", "erro"); return; }
+      this.state.metas = [{ semana, mes, atualizadoEm: this.hojeISO() }];
+      this.salvar("metas");
+      this.registrarAtividade("definiu meta de desperdício", `${semana} kg/semana · ${mes} kg/mês`);
+      this.fecharModal();
+      this.toast("Meta salva! O acompanhamento já está atualizado.");
+      this.renderRelatorio();
+    };
+  },
+
+  renderMetas() {
+    const el = document.getElementById("painelMetas");
+    if (!el) return;
+    const meta = this.metasAtuais();
+    const kgSemana = this.kgTotal(this.desperdicioDaSemana());
+    const kgMes = this.kgTotal(this.desperdicioDoMes());
+    const pctSemana = meta.semana ? Math.min(100, (kgSemana / meta.semana) * 100) : 0;
+    const pctMes = meta.mes ? Math.min(100, (kgMes / meta.mes) * 100) : 0;
+    const sitSemana = kgSemana <= meta.semana ? "Dentro da meta" : "Acima da meta";
+    const sitMes = kgMes <= meta.mes ? "Dentro da meta" : "Acima da meta";
+
+    el.innerHTML = `
+      <div class="panel-head"><h3>🎯 Meta de redução de desperdício</h3>
+        <button class="link-btn" id="btnMetaDesperdicio2">Editar meta →</button></div>
+      <div class="metas-grid">
+        <div class="meta-card ${kgSemana > meta.semana ? 'meta-risco' : ''}">
+          <div class="meta-top"><strong>📅 Esta semana</strong><span>${kgSemana.toFixed(1)} / ${meta.semana} kg</span></div>
+          <div class="meta-bar"><div class="meta-fill" style="width:${pctSemana}%"></div></div>
+          <small>${sitSemana} · ${Math.max(0, meta.semana - kgSemana).toFixed(1)} kg disponíveis</small>
+        </div>
+        <div class="meta-card ${kgMes > meta.mes ? 'meta-risco' : ''}">
+          <div class="meta-top"><strong>🗓️ Este mês</strong><span>${kgMes.toFixed(1)} / ${meta.mes} kg</span></div>
+          <div class="meta-bar"><div class="meta-fill" style="width:${pctMes}%"></div></div>
+          <small>${sitMes} · ${Math.max(0, meta.mes - kgMes).toFixed(1)} kg disponíveis</small>
+        </div>
+      </div>`;
+    const btn = document.getElementById("btnMetaDesperdicio2");
+    if (btn) btn.onclick = () => this.configurarMeta();
+  },
+
   renderRelatorio() {
     const hoje = new Date();
     document.getElementById("relatorioSubtitulo").textContent =
-      `Acompanhamento de ${hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}. Itens com validade vencida entram automaticamente como desperdício.`;
+      `Acompanhamento de ${hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}. As cozinheiras pesam e registram o desperdício diário; itens vencidos entram automaticamente.`;
+    this.renderMetas();
     const lista = this.desperdicioDoMes();
     const total = this.valorDesperdicioMes();
 
@@ -1291,56 +1513,113 @@ const App = {
       <td><button class="icon-action" title="Remover registro" aria-label="Remover registro de ${this.esc(d.item)}" data-del-desperdicio="${d.id}">🗑️</button></td></tr>`).join("")
       : `<tr><td colspan="6" style="text-align:center;padding:24px">${busca ? "Nenhum registro encontrado para essa busca." : "Nenhum desperdício registrado neste mês. 🎉"}</td></tr>`;
 
-    // Sugestões
-    const sugestoes = [
-      { ico: "📅", txt: "Planeje as compras com base no cardápio da semana para evitar excessos que vencem." },
-      { ico: "🧊", txt: "Aplique o PEPS (primeiro que entra, primeiro que sai) na organização da geladeira e da despensa." },
-      { ico: "🍽️", txt: "Ofereça porções adequadas e permita reposição: evita sobra no prato dos alunos." },
-      { ico: "♻️", txt: "Aproveite sobras seguras em novas receitas, como sopas, bolos e saladas." },
-    ];
-    if (principal[0] !== "—") sugestoes.unshift({
-      ico: "🎯",
-      txt: `O principal motivo deste mês foi "${principal[0]}". Priorize ações preventivas para reduzir esse item.`,
-    });
+    // Sugestões baseadas nos dados reais do mês
+    const sugestoes = [];
+    const kgSemana = this.kgTotal(this.desperdicioDaSemana());
+    const kgMes = this.kgTotal(lista);
+    const meta = this.metasAtuais();
+
+    if (kgMes > meta.mes) {
+      sugestoes.push({ ico: "🚨", txt: `Você já passou da meta mensal (${kgMes.toFixed(1)} de ${meta.mes} kg). Reforce o planejamento das porções nesta semana.` });
+    } else if (kgMes > meta.mes * 0.75) {
+      sugestoes.push({ ico: "⚠️", txt: `Atenção: ${Math.round((kgMes / meta.mes) * 100)}% da meta mensal já foi usada. Faltam ${(meta.mes - kgMes).toFixed(1)} kg.` });
+    } else {
+      sugestoes.push({ ico: "🎉", txt: `Ótimo! Só ${kgMes.toFixed(1)} kg desperdiçados este mês — você está ${(meta.mes - kgMes).toFixed(1)} kg abaixo da meta.` });
+    }
+
+    if (principal[0] === "Validade vencida") {
+      sugestoes.push({ ico: "🧊", txt: "A validade vencida é o principal motivo: aplique PEPS ( primeiro que entra, primeiro que sai) e confira a geladeira toda manhã." });
+    } else if (principal[0] === "Sobra de preparo" || principal[0] === "Preparo excessivo") {
+      sugestoes.push({ ico: "🍽️", txt: "Sobra de preparo é o principal motivo: calcule porções por aluno e permita reposição em vez de servir demais." });
+    } else if (principal[0] !== "—") {
+      sugestoes.push({ ico: "🎯", txt: `O principal motivo foi "${principal[0]}". Converse com a equipe sobre esse ponto na próxima reunião.` });
+    }
+
+    if (piorItem[0] !== "—") {
+      sugestoes.push({ ico: "🥬", txt: `"${piorItem[0]}" é o alimento que mais gera perda. Compre menos e use primeiro nas receitas da semana.` });
+    }
+    sugestoes.push({ ico: "📅", txt: "Monte o cardápio antes das compras e compre apenas o necessário para os dias da semana." });
+    sugestoes.push({ ico: "♻️", txt: "Sobras seguras podem virar sopas, tortas e saladas no dia seguinte — evite descartar." });
+
     document.getElementById("sugestoesDesperdicio").innerHTML = `
       <div class="sugestoes-grid">${sugestoes.map(s => `<div class="sugestao"><span class="s-ico">${s.ico}</span><span>${this.esc(s.txt)}</span></div>`).join("")}</div>`;
   },
 
   novoDesperdicio() {
-    this.abrirModal("➕ Registrar desperdício", `
+    const alimentos = [...new Set(this.state.estoque.map(i => i.item))].sort();
+    const hoje = this.hojeISO();
+    const listaKg = this.kgTotal(this.desperdicioDaSemana());
+    const meta = this.metasAtuais();
+
+    this.abrirModal("⚖️ Registrar desperdício do dia", `
+      <p class="hint">Pese o que foi desperdiçado hoje e informe o que foi. O prejuízo é calculado automaticamente pelo preço do alimento no estoque.</p>
       <div class="form-row">
-        <div class="form-group"><label>Alimento</label><input id="d_item" placeholder="Ex.: Tomate" /></div>
-        <div class="form-group"><label>Data</label><input id="d_data" type="date" value="${this.hojeISO()}" /></div>
+        <div class="form-group"><label>O que foi desperdiçado?</label>
+          <input id="d_item" list="listaAlimentos" placeholder="Ex.: Tomate, arroz, frango..." autocomplete="off" />
+          <datalist id="listaAlimentos">${alimentos.map(a => `<option value="${this.esc(a)}"></option>`).join("")}</datalist>
+        </div>
+        <div class="form-group"><label>Data</label><input id="d_data" type="date" value="${hoje}" /></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Quantidade</label><input id="d_qtd" type="number" min="0" step="0.1" value="1" /></div>
-        <div class="form-group"><label>Unidade</label><select id="d_un"><option>kg</option><option>g</option><option>L</option><option>un</option><option>pct</option></select></div>
+        <div class="form-group"><label>Peso / quantidade</label>
+          <input id="d_qtd" type="number" min="0" step="0.1" value="1" /></div>
+        <div class="form-group"><label>Unidade</label>
+          <select id="d_un"><option>kg</option><option>g</option><option>L</option><option>un</option><option>pct</option></select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Motivo</label><select id="d_motivo">
-          <option>Validade vencida</option><option>Apodrecido</option><option>Sobra de preparo</option>
-          <option>Dano no transporte</option><option>Preparo excessivo</option><option>Outro</option>
+        <div class="form-group"><label>Por que foi desperdiçado?</label><select id="d_motivo">
+          <option>Sobra de preparo</option><option>Validade vencida</option><option>Apodrecido</option>
+          <option>Preparo excessivo</option><option>Dano no transporte</option><option>Outro</option>
         </select></div>
-        <div class="form-group"><label>Prejuízo estimado (R$)</label><input id="d_valor" type="number" min="0" step="0.01" value="0" /></div>
+        <div class="form-group"><label>Prejuízo estimado (R$)</label>
+          <input id="d_valor" type="number" min="0" step="0.01" value="0" /></div>
       </div>
+      <p class="hint" id="d_resumo">📊 Já foram registrados ${listaKg.toFixed(1)} kg nesta semana, de uma meta de ${meta.semana} kg.</p>
     `, `<button class="btn btn-outline" data-fechar-modal>Cancelar</button>
-        <button class="btn btn-primary" id="salvarDesperdicio">💾 Registrar</button>`);
+        <button class="btn btn-primary" id="salvarDesperdicio">💾 Registrar desperdício</button>`);
+
+    const calcularValor = () => {
+      const nome = document.getElementById("d_item").value.trim().toLowerCase();
+      const qtd = Number(document.getElementById("d_qtd").value) || 0;
+      const un = document.getElementById("d_un").value;
+      const produto = this.state.estoque.find(i => String(i.item).toLowerCase() === nome);
+      if (!produto || !qtd) return;
+      const fator = un === "g" || un === "ml" ? 0.001 : 1;
+      const preco = Number(produto.preco || 0) * qtd * fator;
+      if (preco > 0) document.getElementById("d_valor").value = preco.toFixed(2);
+    };
+    document.getElementById("d_item").addEventListener("change", calcularValor);
+    document.getElementById("d_qtd").addEventListener("input", calcularValor);
+    document.getElementById("d_un").addEventListener("change", calcularValor);
 
     document.getElementById("salvarDesperdicio").onclick = () => {
       const item = document.getElementById("d_item").value.trim();
-      if (!item) { this.toast("Informe o alimento.", "erro"); return; }
+      const qtd = Number(document.getElementById("d_qtd").value) || 0;
+      if (!item) { this.toast("Informe o que foi desperdiçado.", "erro"); return; }
+      if (qtd <= 0) { this.toast("Informe o peso/quantidade.", "erro"); return; }
+      const unidade = document.getElementById("d_un").value;
+      const motivo = document.getElementById("d_motivo").value;
+      const produto = this.state.estoque.find(i => String(i.item).toLowerCase() === item.toLowerCase());
+      const fator = unidade === "g" || unidade === "ml" ? 0.001 : 1;
+      const valorCalculado = produto ? Number(produto.preco || 0) * qtd * fator : 0;
+      const valor = Number(document.getElementById("d_valor").value) || valorCalculado;
       this.state.desperdicio.push({
         id: this.uid(), item,
-        data: document.getElementById("d_data").value || this.hojeISO(),
-        qtd: Number(document.getElementById("d_qtd").value) || 0,
-        unidade: document.getElementById("d_un").value,
-        motivo: document.getElementById("d_motivo").value,
-        valor: Number(document.getElementById("d_valor").value) || 0,
+        data: document.getElementById("d_data").value || hoje,
+        qtd, unidade, motivo, valor,
+        pesoKg: this.paraKg({ qtd, unidade }),
+        registradoPor: this.usuario?.nome || "Cozinheira",
       });
       this.salvar("desperdicio");
-      this.registrarAtividade("registrou desperdício", `${item} · ${document.getElementById("d_motivo").value}`);
+      this.registrarAtividade("pesou e registrou desperdício", `${item} · ${qtd} ${unidade} · ${motivo}`);
       this.fecharModal();
-      this.toast("Desperdício registrado. O relatório foi atualizado!");
+      const kgSemana = this.kgTotal(this.desperdicioDaSemana());
+      const metaAtual = this.metasAtuais();
+      if (kgSemana > metaAtual.semana) {
+        this.toast("Registrado! Atenção: a meta semanal foi ultrapassada.", "erro");
+      } else {
+        this.toast(`Registrado! ${qtd} ${unidade} de ${item} adicionados ao relatório.`);
+      }
       this.renderRelatorio();
       this.atualizarBadges();
     };
@@ -1367,7 +1646,7 @@ const App = {
 
   /* ---------- Backup e restauração ---------- */
   abrirBackup() {
-    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades"];
+    const chaves = ["cardapio", "receitas", "estoque", "higiene", "avisos", "desperdicio", "checklistRegistros", "atividades", "metas"];
     const dados = {};
     chaves.forEach(c => { dados[c] = this.state[c] || []; });
     const json = JSON.stringify({ formato: "sgk-backup", versao: 1, exportadoEm: new Date().toISOString(), dados }, null, 2);
@@ -1635,6 +1914,10 @@ const App = {
     document.getElementById("btnMontarCardapio").onclick = () => this.formCardapio();
     document.getElementById("btnHistorico").onclick = () => this.abrirHistorico();
     document.getElementById("btnBackup").onclick = () => this.abrirBackup();
+    document.getElementById("btnDesperdicioRapido").onclick = () => this.novoDesperdicio();
+    document.getElementById("btnMetaDesperdicio").onclick = () => this.configurarMeta();
+    const btnMeta2 = document.getElementById("btnMetaDesperdicio2");
+    if (btnMeta2) btnMeta2.onclick = () => this.configurarMeta();
 
     // Botão voltar ao topo
     const btnTopo = document.getElementById("btnTopo");
